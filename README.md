@@ -46,3 +46,17 @@ a standard `http.Handler`
 * The new client has a config that gets an `*url.URL` to customize the endpoint.
 * The new client has a config that gets an `http.RoundTripper` to customize client with libraries, middleware or
   frameworks that support the standard library's objects.
+
+# Usage:
+
+Using the docker container, add the following alias to a `~/.bashrc` or similar
+
+```bash
+alias swagger="docker run --rm -it -e GOPATH=${GOPATH}:/go -v ${HOME}:${HOME} -w $(pwd) -u $(id -u):$(id -g) stratoscale/swagger:v1.0.0"
+```
+
+Then, use the `swagger` command:
+
+```bash
+swagger version
+```
