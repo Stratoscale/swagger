@@ -4,7 +4,7 @@ swagger is [go-swagger](https://github.com/go-swagger/go-swagger) with custom te
 
 In Stratoscale, we really like the idea of API-first services, and we also really like Go.
 We saw the go-swagger library, and thought that most of it can really help us. Generating code from
-swagger files is a big problem with a lot of corner cases, and go-swagger is doing great job other there.
+swagger files is a big problem with a lot of corner cases, and go-swagger is doing great job.
 
 The one thing that we felt missing, is customization of the server to run with our design principles:
 
