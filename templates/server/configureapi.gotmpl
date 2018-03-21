@@ -141,7 +141,7 @@ func Handler(c Config) (http.Handler, error) {
 // Those can be used to extract database query from the http path's query string
 var (
     {{ range .Models -}}
-    {{ if not .Items -}}
+    {{ if and (not .Items) .Properties -}}
     {{ pascalize .Name}}QueryParse = query.MustNewBuilder(&query.Config{Model: models.{{ pascalize .Name}}{}}).ParseRequest
     {{ end -}}
     {{ end -}}
