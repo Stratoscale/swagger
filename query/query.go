@@ -44,6 +44,29 @@ type DBQuery struct {
 	Select string
 }
 
+// Apply applies the query input on a database instance
+func (q *DBQuery) Apply(db *gorm.DB) *gorm.DB {
+	if q == nil {
+		return db
+	}
+	if q.Offset != 0 {
+		db = db.Offset(q.Offset)
+	}
+	if q.Limit != 0 {
+		db = db.Limit(q.Limit)
+	}
+	if q.Select != "" {
+		db = db.Select(q.Select)
+	}
+	if q.Sort != "" {
+		db = db.Order(q.Sort)
+	}
+	if q.CondExp != "" {
+		db = db.Where(q.CondExp, q.CondVal...)
+	}
+	return db
+}
+
 // Wrapper is the interface that wraps the wrap method.
 type Wrapper interface {
 	Wrap(string) string
