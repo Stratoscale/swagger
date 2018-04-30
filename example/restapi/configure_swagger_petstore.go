@@ -51,8 +51,6 @@ type Config struct {
 	// InnerMiddleware is for the handler executors. These do not apply to the swagger.json document.
 	// The middleware executes after routing but before authentication, binding and validation
 	InnerMiddleware func(http.Handler) http.Handler
-	// AuthMiddleware is middleware for authenticating general requests
-	AuthMiddleware func(ctx *middleware.Context, next http.Handler) http.Handler
 }
 
 // Handler returns an http.Handler given the handler configuration
@@ -105,17 +103,6 @@ func Handler(c Config) (http.Handler, error) {
 		return c.PetAPI.PetUpdate(ctx, params)
 	})
 	api.ServerShutdown = func() {}
-
-	// if middleware was not set-upped, use an empty one
-	inner := c.InnerMiddleware
-	if inner == nil {
-		inner = func(h http.Handler) http.Handler { return h }
-	}
-
-	if c.AuthMiddleware != nil {
-		c.InnerMiddleware = func(h http.Handler) http.Handler { return c.AuthMiddleware(api.Context(), inner(h)) }
-	}
-
 	return api.Serve(c.InnerMiddleware), nil
 }
 
