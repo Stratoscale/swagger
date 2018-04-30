@@ -52,9 +52,11 @@ type Config struct {
 	// The middleware executes after routing but before authentication, binding and validation
 	InnerMiddleware func(http.Handler) http.Handler
 	// Auth functions
-	AuthAPIKey func(token string) error
-	AuthBasic  func(user, password string) error
-	AuthOAuth2 func(token string, scopes []string) error
+	AuthAPIKey func(token string) (interface{}, error)
+	AuthBasic  func(user, password string) (interface{}, error)
+	AuthOAuth2 func(token string, scopes []string) (interface{}, error)
+	// StoreAuth is a function that stores authentication in the context object
+	StoreAuth func(context.Context, interface{}) context.Context
 }
 
 // Handler returns an http.Handler given the handler configuration
@@ -72,6 +74,7 @@ func Handler(c Config) (http.Handler, error) {
 	api.JSONProducer = runtime.JSONProducer()
 	api.StoreInventoryGetHandler = store.InventoryGetHandlerFunc(func(params store.InventoryGetParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
+		ctx = c.StoreAuth(ctx, principal)
 		return c.StoreAPI.InventoryGet(ctx, params)
 	})
 	api.StoreOrderCreateHandler = store.OrderCreateHandlerFunc(func(params store.OrderCreateParams) middleware.Responder {
@@ -88,22 +91,27 @@ func Handler(c Config) (http.Handler, error) {
 	})
 	api.PetPetCreateHandler = pet.PetCreateHandlerFunc(func(params pet.PetCreateParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
+		ctx = c.StoreAuth(ctx, principal)
 		return c.PetAPI.PetCreate(ctx, params)
 	})
 	api.PetPetDeleteHandler = pet.PetDeleteHandlerFunc(func(params pet.PetDeleteParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
+		ctx = c.StoreAuth(ctx, principal)
 		return c.PetAPI.PetDelete(ctx, params)
 	})
 	api.PetPetGetHandler = pet.PetGetHandlerFunc(func(params pet.PetGetParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
+		ctx = c.StoreAuth(ctx, principal)
 		return c.PetAPI.PetGet(ctx, params)
 	})
 	api.PetPetListHandler = pet.PetListHandlerFunc(func(params pet.PetListParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
+		ctx = c.StoreAuth(ctx, principal)
 		return c.PetAPI.PetList(ctx, params)
 	})
 	api.PetPetUpdateHandler = pet.PetUpdateHandlerFunc(func(params pet.PetUpdateParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
+		ctx = c.StoreAuth(ctx, principal)
 		return c.PetAPI.PetUpdate(ctx, params)
 	})
 	api.ServerShutdown = func() {}
