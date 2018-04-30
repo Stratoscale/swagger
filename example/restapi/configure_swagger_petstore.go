@@ -51,6 +51,10 @@ type Config struct {
 	// InnerMiddleware is for the handler executors. These do not apply to the swagger.json document.
 	// The middleware executes after routing but before authentication, binding and validation
 	InnerMiddleware func(http.Handler) http.Handler
+	// Auth functions
+	AuthAPIKey func(token string) error
+	AuthBasic  func(user, password string) error
+	AuthOAuth2 func(token string, scopes []string) error
 }
 
 // Handler returns an http.Handler given the handler configuration
