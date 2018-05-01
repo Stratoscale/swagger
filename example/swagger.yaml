@@ -21,6 +21,15 @@ consumes:
 produces:
   - application/json
 
+securityDefinitions:
+  key:
+    type: apiKey
+    in: header
+    name: Cookie
+
+security:
+  - key: []
+
 paths:
 
   /pet:

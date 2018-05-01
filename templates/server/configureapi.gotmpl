@@ -52,12 +52,16 @@ type Config struct {
     // InnerMiddleware is for the handler executors. These do not apply to the swagger.json document.
     // The middleware executes after routing but before authentication, binding and validation
     InnerMiddleware func(http.Handler) http.Handler
-    // Auth functions
-    AuthAPIKey func(token string) (interface{}, error)
-    AuthBasic func(user, password string) (interface{}, error)
-    AuthOAuth2 func(token string, scopes []string) (interface{}, error)
-    // StoreAuth is a function that stores authentication in the context object
-    StoreAuth func(context.Context, interface{}) context.Context
+    Auth Auth
+}
+
+// Auth functions
+type Auth interface {
+    APIKey(token string) (interface{}, error)
+    Basic(user, password string) (interface{}, error)
+    OAuth2(token string, scopes []string) (interface{}, error)
+    // AuthStore is a function that stores authentication in the context object
+    Store(context.Context, interface{}) context.Context
 }
 
 // Handler returns an http.Handler given the handler configuration
@@ -93,19 +97,37 @@ func Handler(c Config) (http.Handler, error) {
 	{{ range .SecurityDefinitions -}}
 	{{ if .IsBasicAuth -}}
 	// Applies when the Authorization header is set with the Basic scheme
+	if c.Auth == nil || c.Auth.Basic == nil {
+        return nil, fmt.Errorf("BasicAuth Authenticator was not defined")
+	}
+	if c.Auth == nil || c.Auth.Store == nil {
+        return nil, fmt.Errorf("Auth store function was not defined")
+	}
 	api.{{ pascalize .ID }}Auth = func(user string, pass string) ({{if not ( eq .Principal "interface{}" )}}*{{ end }}{{.Principal}}, error) {
-		return nil, c.AuthBasic(user pass)
+		return c.Auth.Basic(user pass)
 	}
 	{{ end -}}
 	{{ if .IsAPIKeyAuth -}}
 	// Applies when the "{{ .Name }}" {{ .Source }} is set
+	if c.Auth == nil || c.Auth.APIKey == nil {
+        return nil, fmt.Errorf("APIKey Authenticator was not defined")
+	}
+	if c.Auth == nil || c.Auth.Store == nil {
+        return nil, fmt.Errorf("Auth store function was not defined")
+	}
 	api.{{ pascalize .ID }}Auth = func(token string) ({{if not ( eq .Principal "interface{}" )}}*{{ end }}{{.Principal}}, error) {
-		return nil, c.AuthAPIKey(token)
+		return c.Auth.APIKey(token)
 	}
 	{{ end }}
 	{{ if .IsOAuth2 -}}
+	if c.Auth == nil || c.Auth.OAuth2 == nil {
+        return nil, fmt.Errorf("OAuth2 Authenticator was not defined")
+	}
+	if c.Auth == nil || c.Auth.Store == nil {
+        return nil, fmt.Errorf("Auth store function was not defined")
+	}
 	api.{{ pascalize .ID }}Auth = func(token string, scopes []string) ({{if not ( eq .Principal "interface{}" )}}*{{ end }}{{.Principal}}, error) {
-		return nil, c.AuthOAuth2(token, scopes)
+		return c.Auth.OAuth2(token, scopes)
 	}
 	{{ end -}}
 	{{ end -}}
@@ -122,7 +144,7 @@ func Handler(c Config) (http.Handler, error) {
 	api.{{if ne .Package $package}}{{pascalize .Package}}{{end}}{{ pascalize .Name }}Handler = {{.Package}}.{{ pascalize .Name }}HandlerFunc(func({{ if .WithContext }}ctx context.Context, {{ end }}params {{.Package}}.{{ pascalize .Name }}Params{{if .Authorized}}, principal interface{}{{end}}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
 		{{ if .Authorized -}}
-		ctx = c.StoreAuth(ctx, principal)
+		ctx = c.Auth.Store(ctx, principal)
 		{{ end -}}
 		return c.{{pascalize .Package}}API.{{pascalize .Name}}(ctx, params)
 	})

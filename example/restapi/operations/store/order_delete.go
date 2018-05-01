@@ -12,16 +12,16 @@ import (
 )
 
 // OrderDeleteHandlerFunc turns a function with the right signature into a order delete handler
-type OrderDeleteHandlerFunc func(OrderDeleteParams) middleware.Responder
+type OrderDeleteHandlerFunc func(OrderDeleteParams, interface{}) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn OrderDeleteHandlerFunc) Handle(params OrderDeleteParams) middleware.Responder {
-	return fn(params)
+func (fn OrderDeleteHandlerFunc) Handle(params OrderDeleteParams, principal interface{}) middleware.Responder {
+	return fn(params, principal)
 }
 
 // OrderDeleteHandler interface for that can handle valid order delete params
 type OrderDeleteHandler interface {
-	Handle(OrderDeleteParams) middleware.Responder
+	Handle(OrderDeleteParams, interface{}) middleware.Responder
 }
 
 // NewOrderDelete creates a new http.Handler for the order delete operation
@@ -48,12 +48,25 @@ func (o *OrderDelete) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 	var Params = NewOrderDeleteParams()
 
+	uprinc, aCtx, err := o.Context.Authorize(r, route)
+	if err != nil {
+		o.Context.Respond(rw, r, route.Produces, route, err)
+		return
+	}
+	if aCtx != nil {
+		r = aCtx
+	}
+	var principal interface{}
+	if uprinc != nil {
+		principal = uprinc
+	}
+
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params) // actually handle the request
+	res := o.Handler.Handle(Params, principal) // actually handle the request
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 

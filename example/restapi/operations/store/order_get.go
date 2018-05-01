@@ -12,16 +12,16 @@ import (
 )
 
 // OrderGetHandlerFunc turns a function with the right signature into a order get handler
-type OrderGetHandlerFunc func(OrderGetParams) middleware.Responder
+type OrderGetHandlerFunc func(OrderGetParams, interface{}) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn OrderGetHandlerFunc) Handle(params OrderGetParams) middleware.Responder {
-	return fn(params)
+func (fn OrderGetHandlerFunc) Handle(params OrderGetParams, principal interface{}) middleware.Responder {
+	return fn(params, principal)
 }
 
 // OrderGetHandler interface for that can handle valid order get params
 type OrderGetHandler interface {
-	Handle(OrderGetParams) middleware.Responder
+	Handle(OrderGetParams, interface{}) middleware.Responder
 }
 
 // NewOrderGet creates a new http.Handler for the order get operation
@@ -48,12 +48,25 @@ func (o *OrderGet) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 	var Params = NewOrderGetParams()
 
+	uprinc, aCtx, err := o.Context.Authorize(r, route)
+	if err != nil {
+		o.Context.Respond(rw, r, route.Produces, route, err)
+		return
+	}
+	if aCtx != nil {
+		r = aCtx
+	}
+	var principal interface{}
+	if uprinc != nil {
+		principal = uprinc
+	}
+
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params) // actually handle the request
+	res := o.Handler.Handle(Params, principal) // actually handle the request
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 

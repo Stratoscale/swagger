@@ -462,6 +462,18 @@ func init() {
       }
     }
   },
+  "securityDefinitions": {
+    "key": {
+      "type": "apiKey",
+      "name": "Cookie",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "key": []
+    }
+  ],
   "tags": [
     {
       "description": "Everything about your Pets",

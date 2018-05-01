@@ -85,6 +85,7 @@ func (a *Client) OrderCreate(ctx context.Context, params *OrderCreateParams) (*O
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &OrderCreateReader{formats: a.formats},
+		AuthInfo:           a.authInfo,
 		Context:            ctx,
 	})
 	if err != nil {
@@ -110,6 +111,7 @@ func (a *Client) OrderDelete(ctx context.Context, params *OrderDeleteParams) (*O
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &OrderDeleteReader{formats: a.formats},
+		AuthInfo:           a.authInfo,
 		Context:            ctx,
 	})
 	if err != nil {
@@ -135,6 +137,7 @@ func (a *Client) OrderGet(ctx context.Context, params *OrderGetParams) (*OrderGe
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &OrderGetReader{formats: a.formats},
+		AuthInfo:           a.authInfo,
 		Context:            ctx,
 	})
 	if err != nil {

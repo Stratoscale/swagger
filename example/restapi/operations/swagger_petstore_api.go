@@ -41,13 +41,13 @@ func NewSwaggerPetstoreAPI(spec *loads.Document) *SwaggerPetstoreAPI {
 		StoreInventoryGetHandler: store.InventoryGetHandlerFunc(func(params store.InventoryGetParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreInventoryGet has not yet been implemented")
 		}),
-		StoreOrderCreateHandler: store.OrderCreateHandlerFunc(func(params store.OrderCreateParams) middleware.Responder {
+		StoreOrderCreateHandler: store.OrderCreateHandlerFunc(func(params store.OrderCreateParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreOrderCreate has not yet been implemented")
 		}),
-		StoreOrderDeleteHandler: store.OrderDeleteHandlerFunc(func(params store.OrderDeleteParams) middleware.Responder {
+		StoreOrderDeleteHandler: store.OrderDeleteHandlerFunc(func(params store.OrderDeleteParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreOrderDelete has not yet been implemented")
 		}),
-		StoreOrderGetHandler: store.OrderGetHandlerFunc(func(params store.OrderGetParams) middleware.Responder {
+		StoreOrderGetHandler: store.OrderGetHandlerFunc(func(params store.OrderGetParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation StoreOrderGet has not yet been implemented")
 		}),
 		PetPetCreateHandler: pet.PetCreateHandlerFunc(func(params pet.PetCreateParams, principal interface{}) middleware.Responder {
@@ -65,6 +65,14 @@ func NewSwaggerPetstoreAPI(spec *loads.Document) *SwaggerPetstoreAPI {
 		PetPetUpdateHandler: pet.PetUpdateHandlerFunc(func(params pet.PetUpdateParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PetPetUpdate has not yet been implemented")
 		}),
+
+		// Applies when the "Cookie" header is set
+		KeyAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (key) Cookie from header param [Cookie] has not yet been implemented")
+		},
+
+		// default authorizer is authorized meaning no requests are blocked
+		APIAuthorizer: security.Authorized(),
 	}
 }
 
@@ -94,6 +102,13 @@ type SwaggerPetstoreAPI struct {
 
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
+
+	// KeyAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key Cookie provided in the header
+	KeyAuth func(string) (interface{}, error)
+
+	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
+	APIAuthorizer runtime.Authorizer
 
 	// StoreInventoryGetHandler sets the operation handler for the inventory get operation
 	StoreInventoryGetHandler store.InventoryGetHandler
@@ -176,6 +191,10 @@ func (o *SwaggerPetstoreAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.KeyAuth == nil {
+		unregistered = append(unregistered, "CookieAuth")
+	}
+
 	if o.StoreInventoryGetHandler == nil {
 		unregistered = append(unregistered, "store.InventoryGetHandler")
 	}
@@ -227,14 +246,24 @@ func (o *SwaggerPetstoreAPI) ServeErrorFor(operationID string) func(http.Respons
 // AuthenticatorsFor gets the authenticators for the specified security schemes
 func (o *SwaggerPetstoreAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 
-	return nil
+	result := make(map[string]runtime.Authenticator)
+	for name, scheme := range schemes {
+		switch name {
+
+		case "key":
+
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.KeyAuth)
+
+		}
+	}
+	return result
 
 }
 
 // Authorizer returns the registered authorizer
 func (o *SwaggerPetstoreAPI) Authorizer() runtime.Authorizer {
 
-	return nil
+	return o.APIAuthorizer
 
 }
 
