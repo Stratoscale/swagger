@@ -116,11 +116,7 @@ func Handler(c Config) (http.Handler, error) {
 	{{ end -}}
 
 	{{ if .SecurityDefinitions -}}
-	// Set your custom authorizer if needed. Default one is security.Authorized()
-	// Expected interface runtime.Authorizer
-	//
-	// Example:
-	// api.APIAuthorizer = security.Authorized()
+	api.APIAuthorizer = &authorizer{Auth: c.Auth}
 	{{ end -}}
 
 	{{ range .Operations -}}
@@ -156,3 +152,13 @@ func swaggerCopy(orig json.RawMessage) json.RawMessage {
 	return c
 }
 
+// authorizer is a helper struct to implement the runtime.Authorizer interface.
+type authorizer struct {
+	auth.Auth
+}
+
+func (a *authorizer) Authorize(req *http.Request, principal interface{}) error {
+	ctx := req.Context()
+	ctx = a.Store(ctx, principal)
+	return a.Auth.Authorize(req.WithContext(ctx))
+}
