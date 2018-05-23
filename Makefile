@@ -1,3 +1,5 @@
+all: clean example test
+
 image = go-swagger:strato
 
 id = $(shell id -u):$(shell id -g)
