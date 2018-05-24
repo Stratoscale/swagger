@@ -52,10 +52,16 @@ type Config struct {
 	// The middleware executes after routing but before authentication, binding and validation
 	InnerMiddleware func(http.Handler) http.Handler
 
+	// Authorizer is used to authorize a request after the Auth function was called using the "Auth*" functions
+	// and the principal was stored in the context using the "StoreAuth" function.
 	Authorizer func(*http.Request) error
-	StoreAuth  func(context.Context, interface{}) context.Context
 
-	// Applies when the "Cookie" header is set
+	// StoreAuth is used to store a principal in the request context.
+	// After storing the principal in the context, one can get it from the context in the business logic
+	// using a dedicated typed function.
+	StoreAuth func(context.Context, interface{}) context.Context
+
+	// AuthKey Applies when the "Cookie" header is set
 	AuthKey func(token string) (interface{}, error)
 }
 
@@ -168,6 +174,11 @@ type authorizer struct {
 
 func (a *authorizer) Authorize(req *http.Request, principal interface{}) error {
 	ctx := req.Context()
-	ctx = a.store(ctx, principal)
+	if a.store != nil {
+		ctx = a.store(ctx, principal)
+	}
+	if a.authorize == nil {
+		return nil
+	}
 	return a.authorize(req.WithContext(ctx))
 }

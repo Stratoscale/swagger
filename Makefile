@@ -19,9 +19,9 @@ test:
 	go test ./...
 
 example: build clean
-	cd example && \
-		$(swagger) generate server && \
-		$(swagger) generate client && \
+	cd example ; \
+		$(swagger) generate server ; \
+		$(swagger) generate client ; \
 		go generate ./...
 
 clean:
