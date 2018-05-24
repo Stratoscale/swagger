@@ -53,7 +53,30 @@ type Config struct {
     // InnerMiddleware is for the handler executors. These do not apply to the swagger.json document.
     // The middleware executes after routing but before authentication, binding and validation
     InnerMiddleware func(http.Handler) http.Handler
-    Auth auth.Auth
+
+    // Authorizer is used to authorize a request after the Auth function was called using the "Auth*" functions
+    // and the principal was stored in the context using the "StoreAuth" function.
+	Authorizer func(*http.Request) error
+
+	// StoreAuth is used to store a principal in the request context.
+	// After storing the principal in the context, one can get it from the context in the business logic
+	// using a dedicated typed function.
+    StoreAuth func(context.Context, interface{}) context.Context
+
+	{{ range .SecurityDefinitions -}}
+	{{ if .IsBasicAuth -}}
+	// Auth{{ pascalize .ID }} for basic authentication
+	Auth{{ pascalize .ID }} func(user string, pass string)
+	{{ end -}}
+	{{ if .IsAPIKeyAuth -}}
+	// Auth{{ pascalize .ID }} Applies when the "{{ .Name }}" {{ .Source }} is set
+	Auth{{ pascalize .ID }} func(token string) (interface{}, error)
+	{{ end }}
+	{{ if .IsOAuth2 -}}
+	// Auth{{ pascalize .ID }} For OAuth2 authentication
+	Auth{{ pascalize .ID }} func(token string, scopes []string) (interface{}, error)
+	{{ end -}}
+	{{ end -}}
 }
 
 // Handler returns an http.Handler given the handler configuration
@@ -88,21 +111,13 @@ func Handler(c Config) (http.Handler, error) {
 
 	{{ range .SecurityDefinitions -}}
 	{{ if .IsBasicAuth -}}
-	// Applies when the Authorization header is set with the Basic scheme
-	if c.Auth == nil {
-        return nil, fmt.Errorf("Authenticator was not defined")
-	}
 	api.{{ pascalize .ID }}Auth = func(user string, pass string) ({{if not ( eq .Principal "interface{}" )}}*{{ end }}{{.Principal}}, error) {
-		return c.Auth.Basic(user pass)
+		return c.Auth{{ pascalize .ID }}(user, pass)
 	}
 	{{ end -}}
 	{{ if .IsAPIKeyAuth -}}
-	// Applies when the "{{ .Name }}" {{ .Source }} is set
-	if c.Auth == nil {
-        return nil, fmt.Errorf("Authenticator was not defined")
-	}
 	api.{{ pascalize .ID }}Auth = func(token string) ({{if not ( eq .Principal "interface{}" )}}*{{ end }}{{.Principal}}, error) {
-		return c.Auth.APIKey(token)
+		return c.Auth{{ pascalize .ID }}(token)
 	}
 	{{ end }}
 	{{ if .IsOAuth2 -}}
@@ -110,20 +125,22 @@ func Handler(c Config) (http.Handler, error) {
         return nil, fmt.Errorf("Authenticator was not defined")
 	}
 	api.{{ pascalize .ID }}Auth = func(token string, scopes []string) ({{if not ( eq .Principal "interface{}" )}}*{{ end }}{{.Principal}}, error) {
-		return c.Auth.OAuth2(token, scopes)
+		return c.Auth{{ pascalize .ID }}(token, scopes)
 	}
 	{{ end -}}
 	{{ end -}}
 
 	{{ if .SecurityDefinitions -}}
-	api.APIAuthorizer = &authorizer{Auth: c.Auth}
+	api.APIAuthorizer = &authorizer{authorize: c.Authorizer, store: c.StoreAuth}
 	{{ end -}}
 
 	{{ range .Operations -}}
 	api.{{if ne .Package $package}}{{pascalize .Package}}{{end}}{{ pascalize .Name }}Handler = {{.Package}}.{{ pascalize .Name }}HandlerFunc(func({{ if .WithContext }}ctx context.Context, {{ end }}params {{.Package}}.{{ pascalize .Name }}Params{{if .Authorized}}, principal interface{}{{end}}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
 		{{ if .Authorized -}}
-		ctx = c.Auth.Store(ctx, principal)
+		if c.StoreAuth != nil {
+    		ctx = c.StoreAuth(ctx, principal)
+        }
 		{{ end -}}
 		return c.{{pascalize .Package}}API.{{pascalize .Name}}(ctx, params)
 	})
@@ -154,11 +171,17 @@ func swaggerCopy(orig json.RawMessage) json.RawMessage {
 
 // authorizer is a helper struct to implement the runtime.Authorizer interface.
 type authorizer struct {
-	auth.Auth
+    authorize func(*http.Request) error
+    store func(context.Context, interface{}) context.Context
 }
 
 func (a *authorizer) Authorize(req *http.Request, principal interface{}) error {
 	ctx := req.Context()
-	ctx = a.Store(ctx, principal)
-	return a.Auth.Authorize(req.WithContext(ctx))
+	if a.store != nil {
+		ctx = a.store(ctx, principal)
+	}
+	if a.authorize == nil {
+	    return nil
+	}
+	return a.authorize(req.WithContext(ctx))
 }

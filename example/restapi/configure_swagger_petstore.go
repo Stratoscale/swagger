@@ -51,16 +51,18 @@ type Config struct {
 	// InnerMiddleware is for the handler executors. These do not apply to the swagger.json document.
 	// The middleware executes after routing but before authentication, binding and validation
 	InnerMiddleware func(http.Handler) http.Handler
-	Auth            Auth
-}
 
-// Auth functions
-type Auth interface {
-	APIKey(token string) (interface{}, error)
-	Basic(user, password string) (interface{}, error)
-	OAuth2(token string, scopes []string) (interface{}, error)
-	// AuthStore is a function that stores authentication in the context object
-	Store(context.Context, interface{}) context.Context
+	// Authorizer is used to authorize a request after the Auth function was called using the "Auth*" functions
+	// and the principal was stored in the context using the "StoreAuth" function.
+	Authorizer func(*http.Request) error
+
+	// StoreAuth is used to store a principal in the request context.
+	// After storing the principal in the context, one can get it from the context in the business logic
+	// using a dedicated typed function.
+	StoreAuth func(context.Context, interface{}) context.Context
+
+	// AuthKey Applies when the "Cookie" header is set
+	AuthKey func(token string) (interface{}, error)
 }
 
 // Handler returns an http.Handler given the handler configuration
@@ -76,65 +78,72 @@ func Handler(c Config) (http.Handler, error) {
 
 	api.JSONConsumer = runtime.JSONConsumer()
 	api.JSONProducer = runtime.JSONProducer()
-	// Applies when the "Cookie" header is set
-	if c.Auth == nil || c.Auth.APIKey == nil {
-		return nil, fmt.Errorf("APIKey Authenticator was not defined")
-	}
-	if c.Auth == nil || c.Auth.Store == nil {
-		return nil, fmt.Errorf("Auth store function was not defined")
-	}
 	api.KeyAuth = func(token string) (interface{}, error) {
-		return c.Auth.APIKey(token)
+		return c.AuthKey(token)
 	}
 
-	// Set your custom authorizer if needed. Default one is security.Authorized()
-	// Expected interface runtime.Authorizer
-	//
-	// Example:
-	// api.APIAuthorizer = security.Authorized()
+	api.APIAuthorizer = &authorizer{authorize: c.Authorizer, store: c.StoreAuth}
 	api.StoreInventoryGetHandler = store.InventoryGetHandlerFunc(func(params store.InventoryGetParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		ctx = c.Auth.Store(ctx, principal)
+		if c.StoreAuth != nil {
+			ctx = c.StoreAuth(ctx, principal)
+		}
 		return c.StoreAPI.InventoryGet(ctx, params)
 	})
 	api.StoreOrderCreateHandler = store.OrderCreateHandlerFunc(func(params store.OrderCreateParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		ctx = c.Auth.Store(ctx, principal)
+		if c.StoreAuth != nil {
+			ctx = c.StoreAuth(ctx, principal)
+		}
 		return c.StoreAPI.OrderCreate(ctx, params)
 	})
 	api.StoreOrderDeleteHandler = store.OrderDeleteHandlerFunc(func(params store.OrderDeleteParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		ctx = c.Auth.Store(ctx, principal)
+		if c.StoreAuth != nil {
+			ctx = c.StoreAuth(ctx, principal)
+		}
 		return c.StoreAPI.OrderDelete(ctx, params)
 	})
 	api.StoreOrderGetHandler = store.OrderGetHandlerFunc(func(params store.OrderGetParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		ctx = c.Auth.Store(ctx, principal)
+		if c.StoreAuth != nil {
+			ctx = c.StoreAuth(ctx, principal)
+		}
 		return c.StoreAPI.OrderGet(ctx, params)
 	})
 	api.PetPetCreateHandler = pet.PetCreateHandlerFunc(func(params pet.PetCreateParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		ctx = c.Auth.Store(ctx, principal)
+		if c.StoreAuth != nil {
+			ctx = c.StoreAuth(ctx, principal)
+		}
 		return c.PetAPI.PetCreate(ctx, params)
 	})
 	api.PetPetDeleteHandler = pet.PetDeleteHandlerFunc(func(params pet.PetDeleteParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		ctx = c.Auth.Store(ctx, principal)
+		if c.StoreAuth != nil {
+			ctx = c.StoreAuth(ctx, principal)
+		}
 		return c.PetAPI.PetDelete(ctx, params)
 	})
 	api.PetPetGetHandler = pet.PetGetHandlerFunc(func(params pet.PetGetParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		ctx = c.Auth.Store(ctx, principal)
+		if c.StoreAuth != nil {
+			ctx = c.StoreAuth(ctx, principal)
+		}
 		return c.PetAPI.PetGet(ctx, params)
 	})
 	api.PetPetListHandler = pet.PetListHandlerFunc(func(params pet.PetListParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		ctx = c.Auth.Store(ctx, principal)
+		if c.StoreAuth != nil {
+			ctx = c.StoreAuth(ctx, principal)
+		}
 		return c.PetAPI.PetList(ctx, params)
 	})
 	api.PetPetUpdateHandler = pet.PetUpdateHandlerFunc(func(params pet.PetUpdateParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		ctx = c.Auth.Store(ctx, principal)
+		if c.StoreAuth != nil {
+			ctx = c.StoreAuth(ctx, principal)
+		}
 		return c.PetAPI.PetUpdate(ctx, params)
 	})
 	api.ServerShutdown = func() {}
@@ -144,10 +153,10 @@ func Handler(c Config) (http.Handler, error) {
 // Query parse functions for all the models
 // Those can be used to extract database query from the http path's query string
 var (
-	OrderQueryParse    = query.MustNewBuilder(&query.Config{Model: models.Order{}}).ParseRequest
 	PetQueryParse      = query.MustNewBuilder(&query.Config{Model: models.Pet{}}).ParseRequest
 	CategoryQueryParse = query.MustNewBuilder(&query.Config{Model: models.Category{}}).ParseRequest
 	TagQueryParse      = query.MustNewBuilder(&query.Config{Model: models.Tag{}}).ParseRequest
+	OrderQueryParse    = query.MustNewBuilder(&query.Config{Model: models.Order{}}).ParseRequest
 )
 
 // swaggerCopy copies the swagger json to prevent data races in runtime
@@ -155,4 +164,21 @@ func swaggerCopy(orig json.RawMessage) json.RawMessage {
 	c := make(json.RawMessage, len(orig))
 	copy(c, orig)
 	return c
+}
+
+// authorizer is a helper struct to implement the runtime.Authorizer interface.
+type authorizer struct {
+	authorize func(*http.Request) error
+	store     func(context.Context, interface{}) context.Context
+}
+
+func (a *authorizer) Authorize(req *http.Request, principal interface{}) error {
+	ctx := req.Context()
+	if a.store != nil {
+		ctx = a.store(ctx, principal)
+	}
+	if a.authorize == nil {
+		return nil
+	}
+	return a.authorize(req.WithContext(ctx))
 }
