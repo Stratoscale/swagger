@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Stratoscale/swagger/example/auth"
 	"github.com/Stratoscale/swagger/example/internal"
 	"github.com/Stratoscale/swagger/example/restapi"
 )
@@ -18,9 +19,11 @@ func main() {
 
 	// Initiate the http handler, with the objects that are implementing the business logic.
 	h, err := restapi.Handler(restapi.Config{
-		PetAPI:   &p,
-		StoreAPI: &s,
-		Logger:   log.Printf,
+		PetAPI:     &p,
+		StoreAPI:   &s,
+		AuthToken:  auth.Token,
+		Authorizer: auth.Request,
+		Logger:     log.Printf,
 	})
 	if err != nil {
 		log.Fatal(err)

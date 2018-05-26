@@ -134,10 +134,10 @@ func Handler(c Config) (http.Handler, error) {
 // Query parse functions for all the models
 // Those can be used to extract database query from the http path's query string
 var (
-	PetQueryParse      = query.MustNewBuilder(&query.Config{Model: models.Pet{}}).ParseRequest
-	CategoryQueryParse = query.MustNewBuilder(&query.Config{Model: models.Category{}}).ParseRequest
 	TagQueryParse      = query.MustNewBuilder(&query.Config{Model: models.Tag{}}).ParseRequest
 	OrderQueryParse    = query.MustNewBuilder(&query.Config{Model: models.Order{}}).ParseRequest
+	PetQueryParse      = query.MustNewBuilder(&query.Config{Model: models.Pet{}}).ParseRequest
+	CategoryQueryParse = query.MustNewBuilder(&query.Config{Model: models.Category{}}).ParseRequest
 )
 
 // swaggerCopy copies the swagger json to prevent data races in runtime

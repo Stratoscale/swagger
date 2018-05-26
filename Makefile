@@ -16,6 +16,7 @@ build:
 	docker build . -t $(image)
 
 test:
+	go build ./example/main.go
 	go test ./...
 
 example: build clean
