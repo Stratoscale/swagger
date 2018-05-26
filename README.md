@@ -52,7 +52,7 @@ a standard `http.Handler`
 Using the docker container, add the following alias to a `~/.bashrc` or similar
 
 ```bash
-alias swagger="docker run --rm -it -e GOPATH=${GOPATH}:/go -v ${HOME}:${HOME} -w $(pwd) -u $(id -u):$(id -g) stratoscale/swagger:v1.0.0"
+alias swagger="docker run --rm -e GOPATH=/go -v ${HOME}:${HOME} -w $(pwd) -u $(id -u):$(id -g) stratoscale/swagger:v1.0.9"
 ```
 
 Then, use the `swagger` command:
@@ -60,6 +60,8 @@ Then, use the `swagger` command:
 ```bash
 swagger version
 ```
+
+> This command will run only inside the GOPATH, and assumes the GOPATH is inside your home directory
 
 # Example Walk-Through
 
@@ -115,8 +117,6 @@ type Config struct {
 	// InnerMiddleware is for the handler executors. These do not apply to the swagger.json document.
 	// The middleware executes after routing but before authentication, binding and validation
 	InnerMiddleware func(http.Handler) http.Handler
-	// AuthMiddleware is middleware for authenticating general requests
-	AuthMiddleware func(ctx *middleware.Context, next http.Handler) http.Handler
 }
 ```
 
@@ -192,16 +192,20 @@ This enables us to use custom server endpoint or custom client middleware. Easil
 standard components, and with any library that accepts them.
 
 The client is then generated with the New method:
+
+```go
 // New creates a new swagger petstore HTTP client.
-func New(c Config) *SwaggerPetstore {
-    ...
+func New(c Config) *SwaggerPetstore { ... }
 ```
 
 This method returns an object that has two important fields:
 
 ```go
+type SwaggerPetstore {
+	...
 	Pet       *pet.Client
 	Store     *store.Client
+}
 ```
 
 Thos fields are objects, which implements interfaces declared in the [pet](./example/client/pet) and
