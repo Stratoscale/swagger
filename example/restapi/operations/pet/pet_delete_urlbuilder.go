@@ -42,7 +42,7 @@ func (o *PetDeleteURL) SetBasePath(bp string) {
 func (o *PetDeleteURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/pet/{petId}"
+	var _path = "/pets/{petId}"
 
 	petID := swag.FormatInt64(o.PetID)
 	if petID != "" {

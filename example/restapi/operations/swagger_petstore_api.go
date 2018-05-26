@@ -67,8 +67,8 @@ func NewSwaggerPetstoreAPI(spec *loads.Document) *SwaggerPetstoreAPI {
 		}),
 
 		// Applies when the "Cookie" header is set
-		KeyAuth: func(token string) (interface{}, error) {
-			return nil, errors.NotImplemented("api key auth (key) Cookie from header param [Cookie] has not yet been implemented")
+		TokenAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (token) Cookie from header param [Cookie] has not yet been implemented")
 		},
 
 		// default authorizer is authorized meaning no requests are blocked
@@ -76,7 +76,7 @@ func NewSwaggerPetstoreAPI(spec *loads.Document) *SwaggerPetstoreAPI {
 	}
 }
 
-/*SwaggerPetstoreAPI This is a simplifed version of the sample server Petstore server. You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). For this sample, you can use the api key `special-key` to test the authorization filters.
+/*SwaggerPetstoreAPI This is a simplifed version of the sample server Petstore server. You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). For this sample, you can use the api key `token` to test the authorization filters.
  */
 type SwaggerPetstoreAPI struct {
 	spec            *loads.Document
@@ -103,9 +103,9 @@ type SwaggerPetstoreAPI struct {
 	// JSONProducer registers a producer for a "application/json" mime type
 	JSONProducer runtime.Producer
 
-	// KeyAuth registers a function that takes a token and returns a principal
+	// TokenAuth registers a function that takes a token and returns a principal
 	// it performs authentication based on an api key Cookie provided in the header
-	KeyAuth func(string) (interface{}, error)
+	TokenAuth func(string) (interface{}, error)
 
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
@@ -191,7 +191,7 @@ func (o *SwaggerPetstoreAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
-	if o.KeyAuth == nil {
+	if o.TokenAuth == nil {
 		unregistered = append(unregistered, "CookieAuth")
 	}
 
@@ -250,9 +250,9 @@ func (o *SwaggerPetstoreAPI) AuthenticatorsFor(schemes map[string]spec.SecurityS
 	for name, scheme := range schemes {
 		switch name {
 
-		case "key":
+		case "token":
 
-			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.KeyAuth)
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.TokenAuth)
 
 		}
 	}
@@ -354,27 +354,27 @@ func (o *SwaggerPetstoreAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/pet"] = pet.NewPetCreate(o.context, o.PetPetCreateHandler)
+	o.handlers["POST"]["/pets"] = pet.NewPetCreate(o.context, o.PetPetCreateHandler)
 
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/pet/{petId}"] = pet.NewPetDelete(o.context, o.PetPetDeleteHandler)
+	o.handlers["DELETE"]["/pets/{petId}"] = pet.NewPetDelete(o.context, o.PetPetDeleteHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/pet/{petId}"] = pet.NewPetGet(o.context, o.PetPetGetHandler)
+	o.handlers["GET"]["/pets/{petId}"] = pet.NewPetGet(o.context, o.PetPetGetHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/pet"] = pet.NewPetList(o.context, o.PetPetListHandler)
+	o.handlers["GET"]["/pets"] = pet.NewPetList(o.context, o.PetPetListHandler)
 
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/pet"] = pet.NewPetUpdate(o.context, o.PetPetUpdateHandler)
+	o.handlers["PUT"]["/pets"] = pet.NewPetUpdate(o.context, o.PetPetUpdateHandler)
 
 }
 

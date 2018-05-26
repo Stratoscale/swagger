@@ -61,7 +61,7 @@ type PetDeleteNoContent struct {
 }
 
 func (o *PetDeleteNoContent) Error() string {
-	return fmt.Sprintf("[DELETE /pet/{petId}][%d] petDeleteNoContent ", 204)
+	return fmt.Sprintf("[DELETE /pets/{petId}][%d] petDeleteNoContent ", 204)
 }
 
 func (o *PetDeleteNoContent) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -82,7 +82,7 @@ type PetDeleteBadRequest struct {
 }
 
 func (o *PetDeleteBadRequest) Error() string {
-	return fmt.Sprintf("[DELETE /pet/{petId}][%d] petDeleteBadRequest ", 400)
+	return fmt.Sprintf("[DELETE /pets/{petId}][%d] petDeleteBadRequest ", 400)
 }
 
 func (o *PetDeleteBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -103,7 +103,7 @@ type PetDeleteNotFound struct {
 }
 
 func (o *PetDeleteNotFound) Error() string {
-	return fmt.Sprintf("[DELETE /pet/{petId}][%d] petDeleteNotFound ", 404)
+	return fmt.Sprintf("[DELETE /pets/{petId}][%d] petDeleteNotFound ", 404)
 }
 
 func (o *PetDeleteNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

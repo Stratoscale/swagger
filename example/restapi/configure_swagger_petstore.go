@@ -20,6 +20,10 @@ import (
 	"github.com/Stratoscale/swagger/example/restapi/operations/store"
 )
 
+type contextKey string
+
+const AuthKey contextKey = "Auth"
+
 //go:generate mockery -name PetAPI -inpkg
 
 // PetAPI
@@ -53,16 +57,11 @@ type Config struct {
 	InnerMiddleware func(http.Handler) http.Handler
 
 	// Authorizer is used to authorize a request after the Auth function was called using the "Auth*" functions
-	// and the principal was stored in the context using the "StoreAuth" function.
+	// and the principal was stored in the context in the "AuthKey" context value.
 	Authorizer func(*http.Request) error
 
-	// StoreAuth is used to store a principal in the request context.
-	// After storing the principal in the context, one can get it from the context in the business logic
-	// using a dedicated typed function.
-	StoreAuth func(context.Context, interface{}) context.Context
-
-	// AuthKey Applies when the "Cookie" header is set
-	AuthKey func(token string) (interface{}, error)
+	// AuthToken Applies when the "Cookie" header is set
+	AuthToken func(token string) (interface{}, error)
 }
 
 // Handler returns an http.Handler given the handler configuration
@@ -78,72 +77,54 @@ func Handler(c Config) (http.Handler, error) {
 
 	api.JSONConsumer = runtime.JSONConsumer()
 	api.JSONProducer = runtime.JSONProducer()
-	api.KeyAuth = func(token string) (interface{}, error) {
-		return c.AuthKey(token)
+	api.TokenAuth = func(token string) (interface{}, error) {
+		return c.AuthToken(token)
 	}
 
-	api.APIAuthorizer = &authorizer{authorize: c.Authorizer, store: c.StoreAuth}
+	api.APIAuthorizer = authorizer(c.Authorizer)
 	api.StoreInventoryGetHandler = store.InventoryGetHandlerFunc(func(params store.InventoryGetParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		if c.StoreAuth != nil {
-			ctx = c.StoreAuth(ctx, principal)
-		}
+		ctx = storeAuth(ctx, principal)
 		return c.StoreAPI.InventoryGet(ctx, params)
 	})
 	api.StoreOrderCreateHandler = store.OrderCreateHandlerFunc(func(params store.OrderCreateParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		if c.StoreAuth != nil {
-			ctx = c.StoreAuth(ctx, principal)
-		}
+		ctx = storeAuth(ctx, principal)
 		return c.StoreAPI.OrderCreate(ctx, params)
 	})
 	api.StoreOrderDeleteHandler = store.OrderDeleteHandlerFunc(func(params store.OrderDeleteParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		if c.StoreAuth != nil {
-			ctx = c.StoreAuth(ctx, principal)
-		}
+		ctx = storeAuth(ctx, principal)
 		return c.StoreAPI.OrderDelete(ctx, params)
 	})
 	api.StoreOrderGetHandler = store.OrderGetHandlerFunc(func(params store.OrderGetParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		if c.StoreAuth != nil {
-			ctx = c.StoreAuth(ctx, principal)
-		}
+		ctx = storeAuth(ctx, principal)
 		return c.StoreAPI.OrderGet(ctx, params)
 	})
 	api.PetPetCreateHandler = pet.PetCreateHandlerFunc(func(params pet.PetCreateParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		if c.StoreAuth != nil {
-			ctx = c.StoreAuth(ctx, principal)
-		}
+		ctx = storeAuth(ctx, principal)
 		return c.PetAPI.PetCreate(ctx, params)
 	})
 	api.PetPetDeleteHandler = pet.PetDeleteHandlerFunc(func(params pet.PetDeleteParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		if c.StoreAuth != nil {
-			ctx = c.StoreAuth(ctx, principal)
-		}
+		ctx = storeAuth(ctx, principal)
 		return c.PetAPI.PetDelete(ctx, params)
 	})
 	api.PetPetGetHandler = pet.PetGetHandlerFunc(func(params pet.PetGetParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		if c.StoreAuth != nil {
-			ctx = c.StoreAuth(ctx, principal)
-		}
+		ctx = storeAuth(ctx, principal)
 		return c.PetAPI.PetGet(ctx, params)
 	})
 	api.PetPetListHandler = pet.PetListHandlerFunc(func(params pet.PetListParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		if c.StoreAuth != nil {
-			ctx = c.StoreAuth(ctx, principal)
-		}
+		ctx = storeAuth(ctx, principal)
 		return c.PetAPI.PetList(ctx, params)
 	})
 	api.PetPetUpdateHandler = pet.PetUpdateHandlerFunc(func(params pet.PetUpdateParams, principal interface{}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
-		if c.StoreAuth != nil {
-			ctx = c.StoreAuth(ctx, principal)
-		}
+		ctx = storeAuth(ctx, principal)
 		return c.PetAPI.PetUpdate(ctx, params)
 	})
 	api.ServerShutdown = func() {}
@@ -166,19 +147,17 @@ func swaggerCopy(orig json.RawMessage) json.RawMessage {
 	return c
 }
 
-// authorizer is a helper struct to implement the runtime.Authorizer interface.
-type authorizer struct {
-	authorize func(*http.Request) error
-	store     func(context.Context, interface{}) context.Context
-}
+// authorizer is a helper function to implement the runtime.Authorizer interface.
+type authorizer func(*http.Request) error
 
-func (a *authorizer) Authorize(req *http.Request, principal interface{}) error {
-	ctx := req.Context()
-	if a.store != nil {
-		ctx = a.store(ctx, principal)
-	}
-	if a.authorize == nil {
+func (a authorizer) Authorize(req *http.Request, principal interface{}) error {
+	if a == nil {
 		return nil
 	}
-	return a.authorize(req.WithContext(ctx))
+	ctx := storeAuth(req.Context(), principal)
+	return a(req.WithContext(ctx))
+}
+
+func storeAuth(ctx context.Context, principal interface{}) context.Context {
+	return context.WithValue(ctx, AuthKey, principal)
 }

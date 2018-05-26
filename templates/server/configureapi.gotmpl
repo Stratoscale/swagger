@@ -7,28 +7,30 @@
 package {{ .APIPackage }}
 
 import (
-    "context"
-    "crypto/tls"
-    "net/http"
-    "log"
-    "fmt"
+	"context"
+	"crypto/tls"
+	"net/http"
+	"log"
+	"fmt"
 
-    "github.com/go-openapi/errors"
-    "github.com/go-openapi/runtime"
-    "github.com/go-openapi/runtime/middleware"
-    "github.com/go-openapi/runtime/security"
-    "github.com/tylerb/graceful"
-    "github.com/Stratoscale/swagger/query"
-    "github.com/Stratoscale/swagger/auth"
+	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/runtime/security"
+	"github.com/tylerb/graceful"
+	"github.com/Stratoscale/swagger/query"
+	"github.com/Stratoscale/swagger/auth"
 
-    {{range .DefaultImports}}{{printf "%q" .}}
-    {{end}}
-    {{range $key, $value := .Imports}}{{$key}} {{ printf "%q" $value}}
-    {{end}}
+	{{range .DefaultImports}}{{printf "%q" .}}
+	{{end}}
+	{{range $key, $value := .Imports}}{{$key}} {{ printf "%q" $value}}
+	{{end}}
 )
 {{ $package := .Package }}
 
+type contextKey string
 
+const AuthKey contextKey = "Auth"
 
 {{ range .OperationGroups -}}
 //go:generate mockery -name {{ pascalize .Name}}API -inpkg
@@ -36,32 +38,27 @@ import (
 // {{ pascalize .Name }}API {{ .Description }}
 type {{ pascalize .Name }}API interface {
 {{ range .Operations -}}
-    {{ if .Description -}}
-    // {{ pascalize .Name }} is {{ .Description }}
-    {{ end -}}
-    {{ pascalize .Name }}(ctx context.Context, params {{.Package}}.{{ pascalize .Name }}Params) middleware.Responder
+	{{ if .Description -}}
+	// {{ pascalize .Name }} is {{ .Description }}
+	{{ end -}}
+	{{ pascalize .Name }}(ctx context.Context, params {{.Package}}.{{ pascalize .Name }}Params) middleware.Responder
 {{ end -}}
 }
 {{ end }}
 
 // Config is configuration for Handler
 type Config struct {
-    {{ range .OperationGroups -}}
-    {{ pascalize .Name }}API
-    {{ end -}}
-    Logger func(string, ...interface{})
-    // InnerMiddleware is for the handler executors. These do not apply to the swagger.json document.
-    // The middleware executes after routing but before authentication, binding and validation
-    InnerMiddleware func(http.Handler) http.Handler
+	{{ range .OperationGroups -}}
+	{{ pascalize .Name }}API
+	{{ end -}}
+	Logger func(string, ...interface{})
+	// InnerMiddleware is for the handler executors. These do not apply to the swagger.json document.
+	// The middleware executes after routing but before authentication, binding and validation
+	InnerMiddleware func(http.Handler) http.Handler
 
-    // Authorizer is used to authorize a request after the Auth function was called using the "Auth*" functions
-    // and the principal was stored in the context using the "StoreAuth" function.
+	// Authorizer is used to authorize a request after the Auth function was called using the "Auth*" functions
+	// and the principal was stored in the context in the "AuthKey" context value.
 	Authorizer func(*http.Request) error
-
-	// StoreAuth is used to store a principal in the request context.
-	// After storing the principal in the context, one can get it from the context in the business logic
-	// using a dedicated typed function.
-    StoreAuth func(context.Context, interface{}) context.Context
 
 	{{ range .SecurityDefinitions -}}
 	{{ if .IsBasicAuth -}}
@@ -122,7 +119,7 @@ func Handler(c Config) (http.Handler, error) {
 	{{ end }}
 	{{ if .IsOAuth2 -}}
 	if c.Auth == nil {
-        return nil, fmt.Errorf("Authenticator was not defined")
+		return nil, fmt.Errorf("Authenticator was not defined")
 	}
 	api.{{ pascalize .ID }}Auth = func(token string, scopes []string) ({{if not ( eq .Principal "interface{}" )}}*{{ end }}{{.Principal}}, error) {
 		return c.Auth{{ pascalize .ID }}(token, scopes)
@@ -131,22 +128,20 @@ func Handler(c Config) (http.Handler, error) {
 	{{ end -}}
 
 	{{ if .SecurityDefinitions -}}
-	api.APIAuthorizer = &authorizer{authorize: c.Authorizer, store: c.StoreAuth}
+	api.APIAuthorizer = authorizer(c.Authorizer)
 	{{ end -}}
 
 	{{ range .Operations -}}
 	api.{{if ne .Package $package}}{{pascalize .Package}}{{end}}{{ pascalize .Name }}Handler = {{.Package}}.{{ pascalize .Name }}HandlerFunc(func({{ if .WithContext }}ctx context.Context, {{ end }}params {{.Package}}.{{ pascalize .Name }}Params{{if .Authorized}}, principal interface{}{{end}}) middleware.Responder {
 		ctx := params.HTTPRequest.Context()
 		{{ if .Authorized -}}
-		if c.StoreAuth != nil {
-    		ctx = c.StoreAuth(ctx, principal)
-        }
+		ctx = storeAuth(ctx, principal)
 		{{ end -}}
 		return c.{{pascalize .Package}}API.{{pascalize .Name}}(ctx, params)
 	})
 	{{ end -}}
 
-    api.ServerShutdown = func() {  }
+	api.ServerShutdown = func() {  }
 	return api.Serve(c.InnerMiddleware), nil
 }
 
@@ -154,11 +149,11 @@ func Handler(c Config) (http.Handler, error) {
 // Query parse functions for all the models
 // Those can be used to extract database query from the http path's query string
 var (
-    {{ range .Models -}}
-    {{ if and (not .Items) .Properties -}}
-    {{ pascalize .Name}}QueryParse = query.MustNewBuilder(&query.Config{Model: models.{{ pascalize .Name}}{}}).ParseRequest
-    {{ end -}}
-    {{ end -}}
+	{{ range .Models -}}
+	{{ if and (not .Items) .Properties -}}
+	{{ pascalize .Name}}QueryParse = query.MustNewBuilder(&query.Config{Model: models.{{ pascalize .Name}}{}}).ParseRequest
+	{{ end -}}
+	{{ end -}}
 )
 {{ end -}}
 
@@ -169,19 +164,17 @@ func swaggerCopy(orig json.RawMessage) json.RawMessage {
 	return c
 }
 
-// authorizer is a helper struct to implement the runtime.Authorizer interface.
-type authorizer struct {
-    authorize func(*http.Request) error
-    store func(context.Context, interface{}) context.Context
+// authorizer is a helper function to implement the runtime.Authorizer interface.
+type authorizer func(*http.Request) error
+
+func (a authorizer) Authorize(req *http.Request, principal interface{}) error {
+	if a == nil {
+		return nil
+	}
+	ctx := storeAuth(req.Context(), principal)
+	return a(req.WithContext(ctx))
 }
 
-func (a *authorizer) Authorize(req *http.Request, principal interface{}) error {
-	ctx := req.Context()
-	if a.store != nil {
-		ctx = a.store(ctx, principal)
-	}
-	if a.authorize == nil {
-	    return nil
-	}
-	return a.authorize(req.WithContext(ctx))
+func storeAuth(ctx context.Context, principal interface{}) context.Context {
+	return context.WithValue(ctx, AuthKey, principal)
 }

@@ -231,3 +231,100 @@ type API interface {
 
 They are very similar to the server interfaces, and can be used by consumers of those APIs
 (instead of using the actual client or the `*Pet` struct)
+
+# Authentication
+
+Authenticating and policy enforcement of the application is done in several stages, described below.
+
+## Define security in swagger.yaml
+
+Add to the root of the swagger.yaml the security and security definitions sections.
+
+```yaml
+securityDefinitions:
+  token:
+    type: apiKey
+    in: header
+    name: Cookie
+
+security:
+  - token: []
+```
+
+The securityDefinitions section defines different security types that your application can handle.
+The supported types by go-swagger are:
+* `apiKey` - token that should be able to processed.
+* `oauth2` - token and scopes that should be processed. 
+* and `basic` - user/password that should be processed.
+
+Here we defined an apiKey, that is passed through the Cookie header.
+
+The `security` section defines the default security enforcement for the application. You can select
+different securityDefinitions, as the keys, and apply "scopes" as the values. Those default definitions
+can be overriden in each route by a section with the same name:
+
+```yaml
+paths:
+  /pets:
+    post:
+      [...]
+      security:
+        - token: [admin]
+```
+
+Here we overriden the scope of token in the POST /pets URL so that only admin can use this API.
+
+Let's see how we can use this functionality.
+
+## Writing Security Handlers
+
+Once we created a security definition named "token", a function called "AuthToken" was added to the `restapi.Config`:
+
+```go
+type Config struct {
+    ...
+	// AuthToken Applies when the "Cookie" header is set
+	AuthToken func(token string) (interface{}, error)
+}
+```
+
+This function gets the content of the Cookie header, and should return an `interface{}` and `error`.
+The `interface{}` is the object that should represent the user that performed the request, it should
+be nil to return an unauthorized 401 HTTP response. If the returned `error` is not nil, an HTTP 500,
+internal server error will be returned.
+
+The returned object, will be stored in the request context under the `restapi.AuthKey` key.
+
+There is another function that we should know about, in the `restapi.Config` struct:
+
+```go
+type Config struct {
+	...
+	// Authorizer is used to authorize a request after the Auth function was called using the "Auth*" functions
+	// and the principal was stored in the context in the "AuthKey" context value.
+	Authorizer func(*http.Request) error
+}
+```
+
+This one is a custom defined function that gets the request and can return an error.
+If the returned error is not nil, and 403 HTTP error will be returned to the client - here the policy
+enforcement comes to place.
+There are two things that this function should be aware of:
+
+1. The user - it can retrieve the user information from the context: `ctx.Value(restapi.AuthKey).(MyUserType)`.
+   Usually, a server will have a function for extracting this user information and returns a concrete
+   type which could be used by all the routes.
+2. The route - it can retrieve the route using the go-swagger function: `middleware.MatchedRouteFrom(*http.Request)`.
+   So no need to parse URL and test the request method.
+   This route struct contains the route information. If for example, we want to check the scopes that were
+   defined for the current route in the swagger.yaml we can use the code below:
+   
+```go
+for _, auth := range route.Authenticators {
+    for scopeName, scopeValues := range auth.Scopes {
+        for _, scopeValue := range scopeValues {
+            ...
+        }
+    }
+}
+```

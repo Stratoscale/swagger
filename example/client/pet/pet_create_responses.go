@@ -58,7 +58,7 @@ type PetCreateCreated struct {
 }
 
 func (o *PetCreateCreated) Error() string {
-	return fmt.Sprintf("[POST /pet][%d] petCreateCreated  %+v", 201, o.Payload)
+	return fmt.Sprintf("[POST /pets][%d] petCreateCreated  %+v", 201, o.Payload)
 }
 
 func (o *PetCreateCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -86,7 +86,7 @@ type PetCreateMethodNotAllowed struct {
 }
 
 func (o *PetCreateMethodNotAllowed) Error() string {
-	return fmt.Sprintf("[POST /pet][%d] petCreateMethodNotAllowed ", 405)
+	return fmt.Sprintf("[POST /pets][%d] petCreateMethodNotAllowed ", 405)
 }
 
 func (o *PetCreateMethodNotAllowed) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

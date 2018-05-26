@@ -55,7 +55,7 @@ func (a *Client) PetCreate(ctx context.Context, params *PetCreateParams) (*PetCr
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "PetCreate",
 		Method:             "POST",
-		PathPattern:        "/pet",
+		PathPattern:        "/pets",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -79,7 +79,7 @@ func (a *Client) PetDelete(ctx context.Context, params *PetDeleteParams) (*PetDe
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "PetDelete",
 		Method:             "DELETE",
-		PathPattern:        "/pet/{petId}",
+		PathPattern:        "/pets/{petId}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -103,7 +103,7 @@ func (a *Client) PetGet(ctx context.Context, params *PetGetParams) (*PetGetOK, e
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "PetGet",
 		Method:             "GET",
-		PathPattern:        "/pet/{petId}",
+		PathPattern:        "/pets/{petId}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -127,7 +127,7 @@ func (a *Client) PetList(ctx context.Context, params *PetListParams) (*PetListOK
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "PetList",
 		Method:             "GET",
-		PathPattern:        "/pet",
+		PathPattern:        "/pets",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
@@ -151,7 +151,7 @@ func (a *Client) PetUpdate(ctx context.Context, params *PetUpdateParams) (*PetUp
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "PetUpdate",
 		Method:             "PUT",
-		PathPattern:        "/pet",
+		PathPattern:        "/pets",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},

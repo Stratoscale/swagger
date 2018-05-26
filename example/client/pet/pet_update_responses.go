@@ -72,7 +72,7 @@ type PetUpdateCreated struct {
 }
 
 func (o *PetUpdateCreated) Error() string {
-	return fmt.Sprintf("[PUT /pet][%d] petUpdateCreated  %+v", 201, o.Payload)
+	return fmt.Sprintf("[PUT /pets][%d] petUpdateCreated  %+v", 201, o.Payload)
 }
 
 func (o *PetUpdateCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -100,7 +100,7 @@ type PetUpdateBadRequest struct {
 }
 
 func (o *PetUpdateBadRequest) Error() string {
-	return fmt.Sprintf("[PUT /pet][%d] petUpdateBadRequest ", 400)
+	return fmt.Sprintf("[PUT /pets][%d] petUpdateBadRequest ", 400)
 }
 
 func (o *PetUpdateBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -121,7 +121,7 @@ type PetUpdateNotFound struct {
 }
 
 func (o *PetUpdateNotFound) Error() string {
-	return fmt.Sprintf("[PUT /pet][%d] petUpdateNotFound ", 404)
+	return fmt.Sprintf("[PUT /pets][%d] petUpdateNotFound ", 404)
 }
 
 func (o *PetUpdateNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -142,7 +142,7 @@ type PetUpdateMethodNotAllowed struct {
 }
 
 func (o *PetUpdateMethodNotAllowed) Error() string {
-	return fmt.Sprintf("[PUT /pet][%d] petUpdateMethodNotAllowed ", 405)
+	return fmt.Sprintf("[PUT /pets][%d] petUpdateMethodNotAllowed ", 405)
 }
 
 func (o *PetUpdateMethodNotAllowed) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -25,28 +25,20 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "This is a simplifed version of the sample server Petstore server. You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). For this sample, you can use the api key ` + "`" + `special-key` + "`" + ` to test the authorization filters.\n",
+    "description": "This is a simplifed version of the sample server Petstore server. You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). For this sample, you can use the api key ` + "`" + `token` + "`" + ` to test the authorization filters.\n",
     "title": "Swagger Petstore",
     "version": "1.0.0"
   },
   "host": "petstore.org",
   "basePath": "/api",
   "paths": {
-    "/pet": {
+    "/pets": {
       "get": {
         "tags": [
           "pet"
         ],
         "summary": "List pets",
         "operationId": "PetList",
-        "security": [
-          {
-            "roles": [
-              "admin",
-              "member"
-            ]
-          }
-        ],
         "parameters": [
           {
             "type": "array",
@@ -89,7 +81,7 @@ func init() {
         "operationId": "PetUpdate",
         "security": [
           {
-            "roles": [
+            "token": [
               "admin"
             ]
           }
@@ -131,7 +123,7 @@ func init() {
         "operationId": "PetCreate",
         "security": [
           {
-            "roles": [
+            "token": [
               "admin"
             ]
           }
@@ -160,21 +152,13 @@ func init() {
         }
       }
     },
-    "/pet/{petId}": {
+    "/pets/{petId}": {
       "get": {
         "tags": [
           "pet"
         ],
         "summary": "Get pet by it's ID",
         "operationId": "PetGet",
-        "security": [
-          {
-            "roles": [
-              "admin",
-              "member"
-            ]
-          }
-        ],
         "parameters": [
           {
             "type": "integer",
@@ -208,7 +192,7 @@ func init() {
         "operationId": "PetDelete",
         "security": [
           {
-            "roles": [
+            "token": [
               "admin"
             ]
           }
@@ -248,11 +232,6 @@ func init() {
         ],
         "summary": "Returns pet inventories by status",
         "operationId": "InventoryGet",
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -463,7 +442,7 @@ func init() {
     }
   },
   "securityDefinitions": {
-    "key": {
+    "token": {
       "type": "apiKey",
       "name": "Cookie",
       "in": "header"
@@ -471,7 +450,7 @@ func init() {
   },
   "security": [
     {
-      "key": []
+      "token": []
     }
   ],
   "tags": [

@@ -41,7 +41,7 @@ func (o *PetListURL) SetBasePath(bp string) {
 func (o *PetListURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/pet"
+	var _path = "/pets"
 
 	_basePath := o._basePath
 	if _basePath == "" {

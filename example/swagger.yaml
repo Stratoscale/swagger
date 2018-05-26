@@ -4,7 +4,7 @@ info:
     This is a simplifed version of the sample server Petstore server.
     You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on
     [irc.freenode.net, #swagger](http://swagger.io/irc/).
-    For this sample, you can use the api key `special-key` to test the authorization filters.
+    For this sample, you can use the api key `token` to test the authorization filters.
   version: 1.0.0
   title: Swagger Petstore
 host: petstore.org
@@ -22,17 +22,17 @@ produces:
   - application/json
 
 securityDefinitions:
-  key:
+  token:
     type: apiKey
     in: header
     name: Cookie
 
 security:
-  - key: []
+  - token: []
 
 paths:
 
-  /pet:
+  /pets:
 
     post:
       tags:
@@ -54,8 +54,7 @@ paths:
         405:
           description: Invalid input
       security:
-        - roles:
-          - admin
+        - token: [admin]
 
     put:
       tags:
@@ -81,8 +80,7 @@ paths:
         405:
           description: Validation exception
       security:
-        - roles:
-          - admin
+        - token: [admin]
 
     get:
       tags:
@@ -112,12 +110,8 @@ paths:
               $ref: '#/definitions/Pet'
         400:
           description: Invalid status value
-      security:
-        - roles:
-          - admin
-          - member
 
-  /pet/{petId}:
+  /pets/{petId}:
 
     get:
       tags:
@@ -141,10 +135,6 @@ paths:
           description: Invalid ID supplied
         404:
           description: Pet not found
-      security:
-        - roles:
-          - admin
-          - member
 
     delete:
       tags:
@@ -172,8 +162,7 @@ paths:
         404:
           description: Pet not found
       security:
-        - roles:
-          - admin
+        - token: [admin]
 
   /store/inventory:
 
@@ -190,8 +179,6 @@ paths:
             additionalProperties:
               type: integer
               format: int32
-      security:
-        - api_key: []
 
   /store/order:
 

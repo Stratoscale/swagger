@@ -58,7 +58,7 @@ type PetListOK struct {
 }
 
 func (o *PetListOK) Error() string {
-	return fmt.Sprintf("[GET /pet][%d] petListOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /pets][%d] petListOK  %+v", 200, o.Payload)
 }
 
 func (o *PetListOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -84,7 +84,7 @@ type PetListBadRequest struct {
 }
 
 func (o *PetListBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pet][%d] petListBadRequest ", 400)
+	return fmt.Sprintf("[GET /pets][%d] petListBadRequest ", 400)
 }
 
 func (o *PetListBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

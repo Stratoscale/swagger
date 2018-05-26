@@ -65,7 +65,7 @@ type PetGetOK struct {
 }
 
 func (o *PetGetOK) Error() string {
-	return fmt.Sprintf("[GET /pet/{petId}][%d] petGetOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /pets/{petId}][%d] petGetOK  %+v", 200, o.Payload)
 }
 
 func (o *PetGetOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -93,7 +93,7 @@ type PetGetBadRequest struct {
 }
 
 func (o *PetGetBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pet/{petId}][%d] petGetBadRequest ", 400)
+	return fmt.Sprintf("[GET /pets/{petId}][%d] petGetBadRequest ", 400)
 }
 
 func (o *PetGetBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -114,7 +114,7 @@ type PetGetNotFound struct {
 }
 
 func (o *PetGetNotFound) Error() string {
-	return fmt.Sprintf("[GET /pet/{petId}][%d] petGetNotFound ", 404)
+	return fmt.Sprintf("[GET /pets/{petId}][%d] petGetNotFound ", 404)
 }
 
 func (o *PetGetNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

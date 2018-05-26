@@ -35,7 +35,7 @@ func (o *PetCreateURL) SetBasePath(bp string) {
 func (o *PetCreateURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/pet"
+	var _path = "/pets"
 
 	_basePath := o._basePath
 	if _basePath == "" {
