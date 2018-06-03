@@ -23,6 +23,7 @@ type OrderDeleteNoContent struct {
 
 // NewOrderDeleteNoContent creates OrderDeleteNoContent with default headers values
 func NewOrderDeleteNoContent() *OrderDeleteNoContent {
+
 	return &OrderDeleteNoContent{}
 }
 
@@ -46,6 +47,7 @@ type OrderDeleteBadRequest struct {
 
 // NewOrderDeleteBadRequest creates OrderDeleteBadRequest with default headers values
 func NewOrderDeleteBadRequest() *OrderDeleteBadRequest {
+
 	return &OrderDeleteBadRequest{}
 }
 
@@ -69,6 +71,7 @@ type OrderDeleteNotFound struct {
 
 // NewOrderDeleteNotFound creates OrderDeleteNotFound with default headers values
 func NewOrderDeleteNotFound() *OrderDeleteNotFound {
+
 	return &OrderDeleteNotFound{}
 }
 

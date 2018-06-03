@@ -50,6 +50,7 @@ func (o *PetDeleteURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("PetID is required on PetDeleteURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/api"

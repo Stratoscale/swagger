@@ -50,6 +50,7 @@ func (o *OrderDeleteURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("OrderID is required on OrderDeleteURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/api"

@@ -11,7 +11,6 @@ import (
 	errors "github.com/go-openapi/errors"
 	middleware "github.com/go-openapi/runtime/middleware"
 	strfmt "github.com/go-openapi/strfmt"
-	swag "github.com/go-openapi/swag"
 )
 
 // InventoryGetHandlerFunc turns a function with the right signature into a inventory get handler
@@ -80,10 +79,6 @@ type InventoryGetOKBody map[string]int32
 // Validate validates this inventory get o k body
 func (o InventoryGetOKBody) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if swag.IsZero(o) { // not required
-		return nil
-	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

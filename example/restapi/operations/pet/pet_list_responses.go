@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/Stratoscale/swagger/example/models"
+	models "github.com/Stratoscale/swagger/example/models"
 )
 
 // PetListOKCode is the HTTP code returned for type PetListOK
@@ -25,22 +25,23 @@ type PetListOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.PetListOKBody `json:"body,omitempty"`
+	Payload []*models.Pet `json:"body,omitempty"`
 }
 
 // NewPetListOK creates PetListOK with default headers values
 func NewPetListOK() *PetListOK {
+
 	return &PetListOK{}
 }
 
 // WithPayload adds the payload to the pet list o k response
-func (o *PetListOK) WithPayload(payload models.PetListOKBody) *PetListOK {
+func (o *PetListOK) WithPayload(payload []*models.Pet) *PetListOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the pet list o k response
-func (o *PetListOK) SetPayload(payload models.PetListOKBody) {
+func (o *PetListOK) SetPayload(payload []*models.Pet) {
 	o.Payload = payload
 }
 
@@ -50,7 +51,7 @@ func (o *PetListOK) WriteResponse(rw http.ResponseWriter, producer runtime.Produ
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		payload = make(models.PetListOKBody, 0, 50)
+		payload = make([]*models.Pet, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -71,6 +72,7 @@ type PetListBadRequest struct {
 
 // NewPetListBadRequest creates PetListBadRequest with default headers values
 func NewPetListBadRequest() *PetListBadRequest {
+
 	return &PetListBadRequest{}
 }
 

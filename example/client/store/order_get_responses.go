@@ -13,7 +13,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/Stratoscale/swagger/example/models"
+	models "github.com/Stratoscale/swagger/example/models"
 )
 
 // OrderGetReader is a Reader for the OrderGet structure.

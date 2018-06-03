@@ -11,7 +11,6 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -72,10 +71,6 @@ type InventoryGetOKBody map[string]int32
 // Validate validates this inventory get o k body
 func (o InventoryGetOKBody) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if swag.IsZero(o) { // not required
-		return nil
-	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

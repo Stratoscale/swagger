@@ -18,9 +18,9 @@ import (
 )
 
 // NewPetListParams creates a new PetListParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewPetListParams() PetListParams {
-	var ()
+
 	return PetListParams{}
 }
 
@@ -42,9 +42,12 @@ type PetListParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewPetListParams() beforehand.
 func (o *PetListParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
@@ -65,6 +68,7 @@ func (o *PetListParams) bindStatus(rawData []string, hasKey bool, formats strfmt
 		return errors.Required("status", "query")
 	}
 
+	// CollectionFormat: multi
 	statusIC := rawData
 
 	if len(statusIC) == 0 {
@@ -83,6 +87,11 @@ func (o *PetListParams) bindStatus(rawData []string, hasKey bool, formats strfmt
 	}
 
 	o.Status = statusIR
+
+	return nil
+}
+
+func (o *PetListParams) validateStatus(formats strfmt.Registry) error {
 
 	return nil
 }

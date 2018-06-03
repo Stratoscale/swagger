@@ -32,9 +32,11 @@ type Order struct {
 	Quantity int32 `json:"quantity,omitempty"`
 
 	// ship date
+	// Format: date-time
 	ShipDate strfmt.DateTime `json:"shipDate,omitempty"`
 
 	// Order Status
+	// Enum: [placed approved delivered]
 	Status string `json:"status,omitempty"`
 }
 
@@ -42,14 +44,30 @@ type Order struct {
 func (m *Order) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateShipDate(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Order) validateShipDate(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ShipDate) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("shipDate", "body", "date-time", m.ShipDate.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -66,10 +84,13 @@ func init() {
 }
 
 const (
+
 	// OrderStatusPlaced captures enum value "placed"
 	OrderStatusPlaced string = "placed"
+
 	// OrderStatusApproved captures enum value "approved"
 	OrderStatusApproved string = "approved"
+
 	// OrderStatusDelivered captures enum value "delivered"
 	OrderStatusDelivered string = "delivered"
 )

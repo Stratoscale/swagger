@@ -28,6 +28,7 @@ type InventoryGetOK struct {
 
 // NewInventoryGetOK creates InventoryGetOK with default headers values
 func NewInventoryGetOK() *InventoryGetOK {
+
 	return &InventoryGetOK{}
 }
 
