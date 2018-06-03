@@ -23,6 +23,7 @@ type PetDeleteNoContent struct {
 
 // NewPetDeleteNoContent creates PetDeleteNoContent with default headers values
 func NewPetDeleteNoContent() *PetDeleteNoContent {
+
 	return &PetDeleteNoContent{}
 }
 
@@ -46,6 +47,7 @@ type PetDeleteBadRequest struct {
 
 // NewPetDeleteBadRequest creates PetDeleteBadRequest with default headers values
 func NewPetDeleteBadRequest() *PetDeleteBadRequest {
+
 	return &PetDeleteBadRequest{}
 }
 
@@ -69,6 +71,7 @@ type PetDeleteNotFound struct {
 
 // NewPetDeleteNotFound creates PetDeleteNotFound with default headers values
 func NewPetDeleteNotFound() *PetDeleteNotFound {
+
 	return &PetDeleteNotFound{}
 }
 

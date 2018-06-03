@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/Stratoscale/swagger/example/models"
+	models "github.com/Stratoscale/swagger/example/models"
 )
 
 // PetGetOKCode is the HTTP code returned for type PetGetOK
@@ -30,6 +30,7 @@ type PetGetOK struct {
 
 // NewPetGetOK creates PetGetOK with default headers values
 func NewPetGetOK() *PetGetOK {
+
 	return &PetGetOK{}
 }
 
@@ -68,6 +69,7 @@ type PetGetBadRequest struct {
 
 // NewPetGetBadRequest creates PetGetBadRequest with default headers values
 func NewPetGetBadRequest() *PetGetBadRequest {
+
 	return &PetGetBadRequest{}
 }
 
@@ -91,6 +93,7 @@ type PetGetNotFound struct {
 
 // NewPetGetNotFound creates PetGetNotFound with default headers values
 func NewPetGetNotFound() *PetGetNotFound {
+
 	return &PetGetNotFound{}
 }
 

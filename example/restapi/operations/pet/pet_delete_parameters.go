@@ -16,9 +16,9 @@ import (
 )
 
 // NewPetDeleteParams creates a new PetDeleteParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewPetDeleteParams() PetDeleteParams {
-	var ()
+
 	return PetDeleteParams{}
 }
 
@@ -43,9 +43,12 @@ type PetDeleteParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewPetDeleteParams() beforehand.
 func (o *PetDeleteParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	if err := o.bindAPIKey(r.Header[http.CanonicalHeaderKey("api_key")], true, route.Formats); err != nil {
@@ -68,6 +71,9 @@ func (o *PetDeleteParams) bindAPIKey(rawData []string, hasKey bool, formats strf
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: false
+
 	if raw == "" { // empty values pass all other validations
 		return nil
 	}
@@ -82,6 +88,9 @@ func (o *PetDeleteParams) bindPetID(rawData []string, hasKey bool, formats strfm
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: true
+	// Parameter is provided by construction from the route
 
 	value, err := swag.ConvertInt64(raw)
 	if err != nil {

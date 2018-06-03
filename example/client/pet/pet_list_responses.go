@@ -13,7 +13,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/Stratoscale/swagger/example/models"
+	models "github.com/Stratoscale/swagger/example/models"
 )
 
 // PetListReader is a Reader for the PetList structure.
@@ -54,7 +54,7 @@ func NewPetListOK() *PetListOK {
 successful operation
 */
 type PetListOK struct {
-	Payload models.PetListOKBody
+	Payload []*models.Pet
 }
 
 func (o *PetListOK) Error() string {

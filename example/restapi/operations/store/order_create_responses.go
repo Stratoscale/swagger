@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/Stratoscale/swagger/example/models"
+	models "github.com/Stratoscale/swagger/example/models"
 )
 
 // OrderCreateOKCode is the HTTP code returned for type OrderCreateOK
@@ -30,6 +30,7 @@ type OrderCreateOK struct {
 
 // NewOrderCreateOK creates OrderCreateOK with default headers values
 func NewOrderCreateOK() *OrderCreateOK {
+
 	return &OrderCreateOK{}
 }
 
@@ -68,6 +69,7 @@ type OrderCreateBadRequest struct {
 
 // NewOrderCreateBadRequest creates OrderCreateBadRequest with default headers values
 func NewOrderCreateBadRequest() *OrderCreateBadRequest {
+
 	return &OrderCreateBadRequest{}
 }
 

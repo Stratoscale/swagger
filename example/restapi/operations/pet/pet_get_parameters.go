@@ -16,9 +16,9 @@ import (
 )
 
 // NewPetGetParams creates a new PetGetParams object
-// with the default values initialized.
+// no default values defined in spec.
 func NewPetGetParams() PetGetParams {
-	var ()
+
 	return PetGetParams{}
 }
 
@@ -39,9 +39,12 @@ type PetGetParams struct {
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
-// for simple values it will use straight method calls
+// for simple values it will use straight method calls.
+//
+// To ensure default values, the struct must have been initialized with NewPetGetParams() beforehand.
 func (o *PetGetParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
+
 	o.HTTPRequest = r
 
 	rPetID, rhkPetID, _ := route.Params.GetOK("petId")
@@ -60,6 +63,9 @@ func (o *PetGetParams) bindPetID(rawData []string, hasKey bool, formats strfmt.R
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
 	}
+
+	// Required: true
+	// Parameter is provided by construction from the route
 
 	value, err := swag.ConvertInt64(raw)
 	if err != nil {

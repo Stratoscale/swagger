@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/Stratoscale/swagger/example/models"
+	models "github.com/Stratoscale/swagger/example/models"
 )
 
 // OrderGetOKCode is the HTTP code returned for type OrderGetOK
@@ -30,6 +30,7 @@ type OrderGetOK struct {
 
 // NewOrderGetOK creates OrderGetOK with default headers values
 func NewOrderGetOK() *OrderGetOK {
+
 	return &OrderGetOK{}
 }
 
@@ -68,6 +69,7 @@ type OrderGetBadRequest struct {
 
 // NewOrderGetBadRequest creates OrderGetBadRequest with default headers values
 func NewOrderGetBadRequest() *OrderGetBadRequest {
+
 	return &OrderGetBadRequest{}
 }
 
@@ -91,6 +93,7 @@ type OrderGetNotFound struct {
 
 // NewOrderGetNotFound creates OrderGetNotFound with default headers values
 func NewOrderGetNotFound() *OrderGetNotFound {
+
 	return &OrderGetNotFound{}
 }
 

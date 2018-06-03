@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/Stratoscale/swagger/example/models"
+	models "github.com/Stratoscale/swagger/example/models"
 )
 
 // PetCreateCreatedCode is the HTTP code returned for type PetCreateCreated
@@ -30,6 +30,7 @@ type PetCreateCreated struct {
 
 // NewPetCreateCreated creates PetCreateCreated with default headers values
 func NewPetCreateCreated() *PetCreateCreated {
+
 	return &PetCreateCreated{}
 }
 
@@ -68,6 +69,7 @@ type PetCreateMethodNotAllowed struct {
 
 // NewPetCreateMethodNotAllowed creates PetCreateMethodNotAllowed with default headers values
 func NewPetCreateMethodNotAllowed() *PetCreateMethodNotAllowed {
+
 	return &PetCreateMethodNotAllowed{}
 }
 

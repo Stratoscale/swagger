@@ -50,6 +50,7 @@ func (o *OrderGetURL) Build() (*url.URL, error) {
 	} else {
 		return nil, errors.New("OrderID is required on OrderGetURL")
 	}
+
 	_basePath := o._basePath
 	if _basePath == "" {
 		_basePath = "/api"
