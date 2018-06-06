@@ -79,6 +79,9 @@ func Handler(c Config) (http.Handler, error) {
 	api.JSONConsumer = runtime.JSONConsumer()
 	api.JSONProducer = runtime.JSONProducer()
 	api.TokenAuth = func(token string) (interface{}, error) {
+		if c.AuthToken == nil {
+			return token, nil
+		}
 		return c.AuthToken(token)
 	}
 
