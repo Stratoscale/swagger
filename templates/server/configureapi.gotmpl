@@ -110,19 +110,25 @@ func Handler(c Config) (http.Handler, error) {
 	{{ range .SecurityDefinitions -}}
 	{{ if .IsBasicAuth -}}
 	api.{{ pascalize .ID }}Auth = func(user string, pass string) ({{if not ( eq .Principal "interface{}" )}}*{{ end }}{{.Principal}}, error) {
+        if c.Auth{{ pascalize .ID }} == nil {
+            return "", nil
+        }
 		return c.Auth{{ pascalize .ID }}(user, pass)
 	}
 	{{ end -}}
 	{{ if .IsAPIKeyAuth -}}
 	api.{{ pascalize .ID }}Auth = func(token string) ({{if not ( eq .Principal "interface{}" )}}*{{ end }}{{.Principal}}, error) {
+	    if c.Auth{{ pascalize .ID }} == nil {
+	        return token, nil
+	    }
 		return c.Auth{{ pascalize .ID }}(token)
 	}
 	{{ end }}
 	{{ if .IsOAuth2 -}}
-	if c.Auth == nil {
-		return nil, fmt.Errorf("Authenticator was not defined")
-	}
 	api.{{ pascalize .ID }}Auth = func(token string, scopes []string) ({{if not ( eq .Principal "interface{}" )}}*{{ end }}{{.Principal}}, error) {
+        if c.Auth{{ pascalize .ID }} == nil {
+            return token, nil
+        }
 		return c.Auth{{ pascalize .ID }}(token, scopes)
 	}
 	{{ end -}}
