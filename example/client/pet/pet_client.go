@@ -63,6 +63,7 @@ func (a *Client) PetCreate(ctx context.Context, params *PetCreateParams) (*PetCr
 		Reader:             &PetCreateReader{formats: a.formats},
 		AuthInfo:           a.authInfo,
 		Context:            ctx,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -87,6 +88,7 @@ func (a *Client) PetDelete(ctx context.Context, params *PetDeleteParams) (*PetDe
 		Reader:             &PetDeleteReader{formats: a.formats},
 		AuthInfo:           a.authInfo,
 		Context:            ctx,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -111,6 +113,7 @@ func (a *Client) PetGet(ctx context.Context, params *PetGetParams) (*PetGetOK, e
 		Reader:             &PetGetReader{formats: a.formats},
 		AuthInfo:           a.authInfo,
 		Context:            ctx,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -135,6 +138,7 @@ func (a *Client) PetList(ctx context.Context, params *PetListParams) (*PetListOK
 		Reader:             &PetListReader{formats: a.formats},
 		AuthInfo:           a.authInfo,
 		Context:            ctx,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -159,6 +163,7 @@ func (a *Client) PetUpdate(ctx context.Context, params *PetUpdateParams) (*PetUp
 		Reader:             &PetUpdateReader{formats: a.formats},
 		AuthInfo:           a.authInfo,
 		Context:            ctx,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
