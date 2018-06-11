@@ -76,6 +76,7 @@ func (a *Client) {{ pascalize .Name }}(ctx context.Context, params *{{ pascalize
     AuthInfo: a.authInfo,
     {{ end -}}
     Context: ctx,
+    Client:  params.HTTPClient,
   })
   if err != nil {
     return {{ if .SuccessResponse }}{{ padSurround "nil" "nil" 0 $length }}, {{ end }}err

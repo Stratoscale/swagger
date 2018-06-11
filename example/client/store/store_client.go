@@ -63,6 +63,7 @@ func (a *Client) InventoryGet(ctx context.Context, params *InventoryGetParams) (
 		Reader:             &InventoryGetReader{formats: a.formats},
 		AuthInfo:           a.authInfo,
 		Context:            ctx,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -87,6 +88,7 @@ func (a *Client) OrderCreate(ctx context.Context, params *OrderCreateParams) (*O
 		Reader:             &OrderCreateReader{formats: a.formats},
 		AuthInfo:           a.authInfo,
 		Context:            ctx,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -113,6 +115,7 @@ func (a *Client) OrderDelete(ctx context.Context, params *OrderDeleteParams) (*O
 		Reader:             &OrderDeleteReader{formats: a.formats},
 		AuthInfo:           a.authInfo,
 		Context:            ctx,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
@@ -139,6 +142,7 @@ func (a *Client) OrderGet(ctx context.Context, params *OrderGetParams) (*OrderGe
 		Reader:             &OrderGetReader{formats: a.formats},
 		AuthInfo:           a.authInfo,
 		Context:            ctx,
+		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
