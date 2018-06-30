@@ -62,7 +62,7 @@ func TestHTTPHandler(t *testing.T) {
 					Once()
 			},
 			wantCode: http.StatusOK,
-			wantBody: []byte(`{"id":1,"name":"kitty","tags":null}`),
+			wantBody: []byte(`{"id":1,"name":"kitty"}`),
 		},
 		{
 			name:     "pet create by anonymous should be unauthorized",
@@ -85,7 +85,7 @@ func TestHTTPHandler(t *testing.T) {
 					Once()
 			},
 			wantCode: http.StatusCreated,
-			wantBody: []byte(`{"id":1,"name":"kitty","tags":null}`),
+			wantBody: []byte(`{"id":1,"name":"kitty"}`),
 		},
 	}
 
