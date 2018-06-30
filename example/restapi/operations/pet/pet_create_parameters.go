@@ -36,7 +36,7 @@ type PetCreateParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.Pet
+	Pet *models.Pet
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -53,9 +53,9 @@ func (o *PetCreateParams) BindRequest(r *http.Request, route *middleware.Matched
 		var body models.Pet
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("body", "body"))
+				res = append(res, errors.Required("pet", "body"))
 			} else {
-				res = append(res, errors.NewParseError("body", "body", "", err))
+				res = append(res, errors.NewParseError("pet", "body", "", err))
 			}
 		} else {
 
@@ -65,11 +65,11 @@ func (o *PetCreateParams) BindRequest(r *http.Request, route *middleware.Matched
 			}
 
 			if len(res) == 0 {
-				o.Body = &body
+				o.Pet = &body
 			}
 		}
 	} else {
-		res = append(res, errors.Required("body", "body"))
+		res = append(res, errors.Required("pet", "body"))
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

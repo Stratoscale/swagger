@@ -1,11 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"bytes"
 
 	"github.com/Stratoscale/swagger/example/auth"
 	"github.com/Stratoscale/swagger/example/models"
@@ -19,6 +18,7 @@ import (
 
 const target = "http://petstore.org/api"
 
+// mocks contains on the restapi.Config dependencies that should be mocked
 type mocks struct {
 	pet   restapi.MockPetAPI
 	store restapi.MockStoreAPI
@@ -34,11 +34,17 @@ func TestHTTPHandler(t *testing.T) {
 
 	// declare the test cases
 	tests := []struct {
-		name     string
-		req      *http.Request
-		cookie   string
-		prepare  func(*testing.T, *mocks)
+		// name for test case
+		name string
+		// req is the request that will be tested
+		req *http.Request
+		// cookie that will be added to the request
+		cookie string
+		// prepare mocks before running the test
+		prepare func(*testing.T, *mocks)
+		// wantCode is the expected response status code
 		wantCode int
+		// wantBody is the expected response body
 		wantBody []byte
 	}{
 		{
@@ -84,10 +90,7 @@ func TestHTTPHandler(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			var (
 				resp  = httptest.NewRecorder()
 				mocks mocks

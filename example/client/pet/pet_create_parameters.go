@@ -64,11 +64,11 @@ for the pet create operation typically these are written to a http.Request
 */
 type PetCreateParams struct {
 
-	/*Body
+	/*Pet
 	  Pet object that needs to be added to the store
 
 	*/
-	Body *models.Pet
+	Pet *models.Pet
 
 	timeout    time.Duration
 	Context    context.Context
@@ -108,15 +108,15 @@ func (o *PetCreateParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithBody adds the body to the pet create params
-func (o *PetCreateParams) WithBody(body *models.Pet) *PetCreateParams {
-	o.SetBody(body)
+// WithPet adds the pet to the pet create params
+func (o *PetCreateParams) WithPet(pet *models.Pet) *PetCreateParams {
+	o.SetPet(pet)
 	return o
 }
 
-// SetBody adds the body to the pet create params
-func (o *PetCreateParams) SetBody(body *models.Pet) {
-	o.Body = body
+// SetPet adds the pet to the pet create params
+func (o *PetCreateParams) SetPet(pet *models.Pet) {
+	o.Pet = pet
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -127,8 +127,8 @@ func (o *PetCreateParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 	}
 	var res []error
 
-	if o.Body != nil {
-		if err := r.SetBodyParam(o.Body); err != nil {
+	if o.Pet != nil {
+		if err := r.SetBodyParam(o.Pet); err != nil {
 			return err
 		}
 	}

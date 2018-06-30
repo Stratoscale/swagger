@@ -64,11 +64,11 @@ for the order create operation typically these are written to a http.Request
 */
 type OrderCreateParams struct {
 
-	/*Body
+	/*Order
 	  order placed for purchasing the pet
 
 	*/
-	Body *models.Order
+	Order *models.Order
 
 	timeout    time.Duration
 	Context    context.Context
@@ -108,15 +108,15 @@ func (o *OrderCreateParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithBody adds the body to the order create params
-func (o *OrderCreateParams) WithBody(body *models.Order) *OrderCreateParams {
-	o.SetBody(body)
+// WithOrder adds the order to the order create params
+func (o *OrderCreateParams) WithOrder(order *models.Order) *OrderCreateParams {
+	o.SetOrder(order)
 	return o
 }
 
-// SetBody adds the body to the order create params
-func (o *OrderCreateParams) SetBody(body *models.Order) {
-	o.Body = body
+// SetOrder adds the order to the order create params
+func (o *OrderCreateParams) SetOrder(order *models.Order) {
+	o.Order = order
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -127,8 +127,8 @@ func (o *OrderCreateParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 	}
 	var res []error
 
-	if o.Body != nil {
-		if err := r.SetBodyParam(o.Body); err != nil {
+	if o.Order != nil {
+		if err := r.SetBodyParam(o.Order); err != nil {
 			return err
 		}
 	}

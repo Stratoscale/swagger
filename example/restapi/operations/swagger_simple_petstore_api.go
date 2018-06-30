@@ -23,9 +23,9 @@ import (
 	"github.com/Stratoscale/swagger/example/restapi/operations/store"
 )
 
-// NewSwaggerPetstoreAPI creates a new SwaggerPetstore instance
-func NewSwaggerPetstoreAPI(spec *loads.Document) *SwaggerPetstoreAPI {
-	return &SwaggerPetstoreAPI{
+// NewSwaggerSimplePetstoreAPI creates a new SwaggerSimplePetstore instance
+func NewSwaggerSimplePetstoreAPI(spec *loads.Document) *SwaggerSimplePetstoreAPI {
+	return &SwaggerSimplePetstoreAPI{
 		handlers:            make(map[string]map[string]http.Handler),
 		formats:             strfmt.Default,
 		defaultConsumes:     "application/json",
@@ -78,9 +78,8 @@ func NewSwaggerPetstoreAPI(spec *loads.Document) *SwaggerPetstoreAPI {
 	}
 }
 
-/*SwaggerPetstoreAPI This is a simplifed version of the sample server Petstore server. You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). For this sample, you can use the api key `token` to test the authorization filters.
- */
-type SwaggerPetstoreAPI struct {
+/*SwaggerSimplePetstoreAPI This is a simplified version of the sample server Petstore server. */
+type SwaggerSimplePetstoreAPI struct {
 	spec            *loads.Document
 	context         *middleware.Context
 	handlers        map[string]map[string]http.Handler
@@ -149,42 +148,42 @@ type SwaggerPetstoreAPI struct {
 }
 
 // SetDefaultProduces sets the default produces media type
-func (o *SwaggerPetstoreAPI) SetDefaultProduces(mediaType string) {
+func (o *SwaggerSimplePetstoreAPI) SetDefaultProduces(mediaType string) {
 	o.defaultProduces = mediaType
 }
 
 // SetDefaultConsumes returns the default consumes media type
-func (o *SwaggerPetstoreAPI) SetDefaultConsumes(mediaType string) {
+func (o *SwaggerSimplePetstoreAPI) SetDefaultConsumes(mediaType string) {
 	o.defaultConsumes = mediaType
 }
 
 // SetSpec sets a spec that will be served for the clients.
-func (o *SwaggerPetstoreAPI) SetSpec(spec *loads.Document) {
+func (o *SwaggerSimplePetstoreAPI) SetSpec(spec *loads.Document) {
 	o.spec = spec
 }
 
 // DefaultProduces returns the default produces media type
-func (o *SwaggerPetstoreAPI) DefaultProduces() string {
+func (o *SwaggerSimplePetstoreAPI) DefaultProduces() string {
 	return o.defaultProduces
 }
 
 // DefaultConsumes returns the default consumes media type
-func (o *SwaggerPetstoreAPI) DefaultConsumes() string {
+func (o *SwaggerSimplePetstoreAPI) DefaultConsumes() string {
 	return o.defaultConsumes
 }
 
 // Formats returns the registered string formats
-func (o *SwaggerPetstoreAPI) Formats() strfmt.Registry {
+func (o *SwaggerSimplePetstoreAPI) Formats() strfmt.Registry {
 	return o.formats
 }
 
 // RegisterFormat registers a custom format validator
-func (o *SwaggerPetstoreAPI) RegisterFormat(name string, format strfmt.Format, validator strfmt.Validator) {
+func (o *SwaggerSimplePetstoreAPI) RegisterFormat(name string, format strfmt.Format, validator strfmt.Validator) {
 	o.formats.Add(name, format, validator)
 }
 
-// Validate validates the registrations in the SwaggerPetstoreAPI
-func (o *SwaggerPetstoreAPI) Validate() error {
+// Validate validates the registrations in the SwaggerSimplePetstoreAPI
+func (o *SwaggerSimplePetstoreAPI) Validate() error {
 	var unregistered []string
 
 	if o.JSONConsumer == nil {
@@ -243,12 +242,12 @@ func (o *SwaggerPetstoreAPI) Validate() error {
 }
 
 // ServeErrorFor gets a error handler for a given operation id
-func (o *SwaggerPetstoreAPI) ServeErrorFor(operationID string) func(http.ResponseWriter, *http.Request, error) {
+func (o *SwaggerSimplePetstoreAPI) ServeErrorFor(operationID string) func(http.ResponseWriter, *http.Request, error) {
 	return o.ServeError
 }
 
 // AuthenticatorsFor gets the authenticators for the specified security schemes
-func (o *SwaggerPetstoreAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
+func (o *SwaggerSimplePetstoreAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 
 	result := make(map[string]runtime.Authenticator)
 	for name, scheme := range schemes {
@@ -265,14 +264,14 @@ func (o *SwaggerPetstoreAPI) AuthenticatorsFor(schemes map[string]spec.SecurityS
 }
 
 // Authorizer returns the registered authorizer
-func (o *SwaggerPetstoreAPI) Authorizer() runtime.Authorizer {
+func (o *SwaggerSimplePetstoreAPI) Authorizer() runtime.Authorizer {
 
 	return o.APIAuthorizer
 
 }
 
 // ConsumersFor gets the consumers for the specified media types
-func (o *SwaggerPetstoreAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Consumer {
+func (o *SwaggerSimplePetstoreAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Consumer {
 
 	result := make(map[string]runtime.Consumer)
 	for _, mt := range mediaTypes {
@@ -292,7 +291,7 @@ func (o *SwaggerPetstoreAPI) ConsumersFor(mediaTypes []string) map[string]runtim
 }
 
 // ProducersFor gets the producers for the specified media types
-func (o *SwaggerPetstoreAPI) ProducersFor(mediaTypes []string) map[string]runtime.Producer {
+func (o *SwaggerSimplePetstoreAPI) ProducersFor(mediaTypes []string) map[string]runtime.Producer {
 
 	result := make(map[string]runtime.Producer)
 	for _, mt := range mediaTypes {
@@ -312,7 +311,7 @@ func (o *SwaggerPetstoreAPI) ProducersFor(mediaTypes []string) map[string]runtim
 }
 
 // HandlerFor gets a http.Handler for the provided operation method and path
-func (o *SwaggerPetstoreAPI) HandlerFor(method, path string) (http.Handler, bool) {
+func (o *SwaggerSimplePetstoreAPI) HandlerFor(method, path string) (http.Handler, bool) {
 	if o.handlers == nil {
 		return nil, false
 	}
@@ -327,8 +326,8 @@ func (o *SwaggerPetstoreAPI) HandlerFor(method, path string) (http.Handler, bool
 	return h, ok
 }
 
-// Context returns the middleware context for the swagger petstore API
-func (o *SwaggerPetstoreAPI) Context() *middleware.Context {
+// Context returns the middleware context for the swagger simple petstore API
+func (o *SwaggerSimplePetstoreAPI) Context() *middleware.Context {
 	if o.context == nil {
 		o.context = middleware.NewRoutableContext(o.spec, o, nil)
 	}
@@ -336,7 +335,7 @@ func (o *SwaggerPetstoreAPI) Context() *middleware.Context {
 	return o.context
 }
 
-func (o *SwaggerPetstoreAPI) initHandlerCache() {
+func (o *SwaggerSimplePetstoreAPI) initHandlerCache() {
 	o.Context() // don't care about the result, just that the initialization happened
 
 	if o.handlers == nil {
@@ -386,13 +385,13 @@ func (o *SwaggerPetstoreAPI) initHandlerCache() {
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/pets"] = pet.NewPetUpdate(o.context, o.PetPetUpdateHandler)
+	o.handlers["PUT"]["/pets/{petId}"] = pet.NewPetUpdate(o.context, o.PetPetUpdateHandler)
 
 }
 
 // Serve creates a http handler to serve the API over HTTP
 // can be used directly in http.ListenAndServe(":8000", api.Serve(nil))
-func (o *SwaggerPetstoreAPI) Serve(builder middleware.Builder) http.Handler {
+func (o *SwaggerSimplePetstoreAPI) Serve(builder middleware.Builder) http.Handler {
 	o.Init()
 
 	if o.Middleware != nil {
@@ -402,18 +401,18 @@ func (o *SwaggerPetstoreAPI) Serve(builder middleware.Builder) http.Handler {
 }
 
 // Init allows you to just initialize the handler cache, you can then recompose the middleware as you see fit
-func (o *SwaggerPetstoreAPI) Init() {
+func (o *SwaggerSimplePetstoreAPI) Init() {
 	if len(o.handlers) == 0 {
 		o.initHandlerCache()
 	}
 }
 
 // RegisterConsumer allows you to add (or override) a consumer for a media type.
-func (o *SwaggerPetstoreAPI) RegisterConsumer(mediaType string, consumer runtime.Consumer) {
+func (o *SwaggerSimplePetstoreAPI) RegisterConsumer(mediaType string, consumer runtime.Consumer) {
 	o.customConsumers[mediaType] = consumer
 }
 
 // RegisterProducer allows you to add (or override) a producer for a media type.
-func (o *SwaggerPetstoreAPI) RegisterProducer(mediaType string, producer runtime.Producer) {
+func (o *SwaggerSimplePetstoreAPI) RegisterProducer(mediaType string, producer runtime.Producer) {
 	o.customProducers[mediaType] = producer
 }

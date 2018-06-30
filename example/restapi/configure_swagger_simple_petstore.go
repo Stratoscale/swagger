@@ -72,7 +72,7 @@ func Handler(c Config) (http.Handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("analyze swagger: %v", err)
 	}
-	api := operations.NewSwaggerPetstoreAPI(spec)
+	api := operations.NewSwaggerSimplePetstoreAPI(spec)
 	api.ServeError = errors.ServeError
 	api.Logger = c.Logger
 
@@ -141,7 +141,6 @@ var (
 	CategoryQueryParse = query.MustNewBuilder(&query.Config{Model: models.Category{}}).ParseRequest
 	OrderQueryParse    = query.MustNewBuilder(&query.Config{Model: models.Order{}}).ParseRequest
 	PetQueryParse      = query.MustNewBuilder(&query.Config{Model: models.Pet{}}).ParseRequest
-	TagQueryParse      = query.MustNewBuilder(&query.Config{Model: models.Tag{}}).ParseRequest
 )
 
 // swaggerCopy copies the swagger json to prevent data races in runtime

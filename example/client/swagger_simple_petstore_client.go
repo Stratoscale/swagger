@@ -20,7 +20,7 @@ import (
 const (
 	// DefaultHost is the default Host
 	// found in Meta (info) section of spec file
-	DefaultHost string = "petstore.org"
+	DefaultHost string = "localhost:5000"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
 	DefaultBasePath string = "/api"
@@ -38,8 +38,8 @@ type Config struct {
 	AuthInfo runtime.ClientAuthInfoWriter
 }
 
-// New creates a new swagger petstore HTTP client.
-func New(c Config) *SwaggerPetstore {
+// New creates a new swagger simple petstore HTTP client.
+func New(c Config) *SwaggerSimplePetstore {
 	var (
 		host     = DefaultHost
 		basePath = DefaultBasePath
@@ -57,15 +57,15 @@ func New(c Config) *SwaggerPetstore {
 		transport.Transport = c.Transport
 	}
 
-	cli := new(SwaggerPetstore)
+	cli := new(SwaggerSimplePetstore)
 	cli.Transport = transport
 	cli.Pet = pet.New(transport, strfmt.Default, c.AuthInfo)
 	cli.Store = store.New(transport, strfmt.Default, c.AuthInfo)
 	return cli
 }
 
-// SwaggerPetstore is a client for swagger petstore
-type SwaggerPetstore struct {
+// SwaggerSimplePetstore is a client for swagger simple petstore
+type SwaggerSimplePetstore struct {
 	Pet       *pet.Client
 	Store     *store.Client
 	Transport runtime.ClientTransport

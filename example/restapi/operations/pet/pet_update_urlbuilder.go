@@ -9,11 +9,18 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+	"strings"
+
+	"github.com/go-openapi/swag"
 )
 
 // PetUpdateURL generates an URL for the pet update operation
 type PetUpdateURL struct {
+	PetID int64
+
 	_basePath string
+	// avoid unkeyed usage
+	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -35,7 +42,14 @@ func (o *PetUpdateURL) SetBasePath(bp string) {
 func (o *PetUpdateURL) Build() (*url.URL, error) {
 	var result url.URL
 
-	var _path = "/pets"
+	var _path = "/pets/{petId}"
+
+	petID := swag.FormatInt64(o.PetID)
+	if petID != "" {
+		_path = strings.Replace(_path, "{petId}", petID, -1)
+	} else {
+		return nil, errors.New("PetID is required on PetUpdateURL")
+	}
 
 	_basePath := o._basePath
 	if _basePath == "" {

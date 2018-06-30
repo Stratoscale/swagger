@@ -14,6 +14,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -64,11 +65,16 @@ for the pet update operation typically these are written to a http.Request
 */
 type PetUpdateParams struct {
 
-	/*Body
+	/*Pet
 	  Pet object that needs to be added to the store
 
 	*/
-	Body *models.Pet
+	Pet *models.Pet
+	/*PetID
+	  ID of pet to return
+
+	*/
+	PetID int64
 
 	timeout    time.Duration
 	Context    context.Context
@@ -108,15 +114,26 @@ func (o *PetUpdateParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithBody adds the body to the pet update params
-func (o *PetUpdateParams) WithBody(body *models.Pet) *PetUpdateParams {
-	o.SetBody(body)
+// WithPet adds the pet to the pet update params
+func (o *PetUpdateParams) WithPet(pet *models.Pet) *PetUpdateParams {
+	o.SetPet(pet)
 	return o
 }
 
-// SetBody adds the body to the pet update params
-func (o *PetUpdateParams) SetBody(body *models.Pet) {
-	o.Body = body
+// SetPet adds the pet to the pet update params
+func (o *PetUpdateParams) SetPet(pet *models.Pet) {
+	o.Pet = pet
+}
+
+// WithPetID adds the petID to the pet update params
+func (o *PetUpdateParams) WithPetID(petID int64) *PetUpdateParams {
+	o.SetPetID(petID)
+	return o
+}
+
+// SetPetID adds the petId to the pet update params
+func (o *PetUpdateParams) SetPetID(petID int64) {
+	o.PetID = petID
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -127,10 +144,15 @@ func (o *PetUpdateParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 	}
 	var res []error
 
-	if o.Body != nil {
-		if err := r.SetBodyParam(o.Body); err != nil {
+	if o.Pet != nil {
+		if err := r.SetBodyParam(o.Pet); err != nil {
 			return err
 		}
+	}
+
+	// path param petId
+	if err := r.SetPathParam("petId", swag.FormatInt64(o.PetID)); err != nil {
+		return err
 	}
 
 	if len(res) > 0 {

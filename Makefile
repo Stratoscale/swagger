@@ -2,14 +2,11 @@ all: clean example test
 
 image = go-swagger:strato
 
-id = $(shell id -u):$(shell id -g)
-
-example_wd = $(PWD)/example
-swagger = docker run --rm -it \
+swagger = docker run --rm \
 	-e GOPATH=$(GOPATH):/go \
-	-v $(HOME):$(HOME) \
-	-w $(example_wd) \
-	-u $(id) \
+	-v $(PWD):$(PWD) \
+	-w $(PWD)/example \
+	-u $(shell id -u):$(shell id -g) \
 	$(image)
 
 build:

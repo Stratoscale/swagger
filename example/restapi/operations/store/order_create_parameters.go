@@ -36,7 +36,7 @@ type OrderCreateParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body *models.Order
+	Order *models.Order
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -53,9 +53,9 @@ func (o *OrderCreateParams) BindRequest(r *http.Request, route *middleware.Match
 		var body models.Order
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("body", "body"))
+				res = append(res, errors.Required("order", "body"))
 			} else {
-				res = append(res, errors.NewParseError("body", "body", "", err))
+				res = append(res, errors.NewParseError("order", "body", "", err))
 			}
 		} else {
 
@@ -65,11 +65,11 @@ func (o *OrderCreateParams) BindRequest(r *http.Request, route *middleware.Match
 			}
 
 			if len(res) == 0 {
-				o.Body = &body
+				o.Order = &body
 			}
 		}
 	} else {
-		res = append(res, errors.Required("body", "body"))
+		res = append(res, errors.Required("order", "body"))
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

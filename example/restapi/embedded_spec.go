@@ -29,11 +29,11 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "This is a simplifed version of the sample server Petstore server. You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). For this sample, you can use the api key ` + "`" + `token` + "`" + ` to test the authorization filters.\n",
-    "title": "Swagger Petstore",
+    "description": "This is a simplified version of the sample server Petstore server.",
+    "title": "Swagger Simple Petstore",
     "version": "1.0.0"
   },
-  "host": "petstore.org",
+  "host": "localhost:5000",
   "basePath": "/api",
   "paths": {
     "/pets": {
@@ -77,48 +77,6 @@ func init() {
           }
         }
       },
-      "put": {
-        "security": [
-          {
-            "token": [
-              "admin"
-            ]
-          }
-        ],
-        "tags": [
-          "pet"
-        ],
-        "summary": "Update an existing pet",
-        "operationId": "PetUpdate",
-        "parameters": [
-          {
-            "description": "Pet object that needs to be added to the store",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Pet"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Updated successfully",
-            "schema": {
-              "$ref": "#/definitions/Pet"
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Pet not found"
-          },
-          "405": {
-            "description": "Validation exception"
-          }
-        }
-      },
       "post": {
         "security": [
           {
@@ -135,7 +93,7 @@ func init() {
         "parameters": [
           {
             "description": "Pet object that needs to be added to the store",
-            "name": "body",
+            "name": "pet",
             "in": "body",
             "required": true,
             "schema": {
@@ -185,6 +143,56 @@ func init() {
           },
           "404": {
             "description": "Pet not found"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "token": [
+              "admin"
+            ]
+          }
+        ],
+        "tags": [
+          "pet"
+        ],
+        "summary": "Update an existing pet",
+        "operationId": "PetUpdate",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of pet to return",
+            "name": "petId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Pet object that needs to be added to the store",
+            "name": "pet",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Pet"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Updated successfully",
+            "schema": {
+              "$ref": "#/definitions/Pet"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          },
+          "405": {
+            "description": "Validation exception"
           }
         }
       },
@@ -260,7 +268,7 @@ func init() {
         "parameters": [
           {
             "description": "order placed for purchasing the pet",
-            "name": "body",
+            "name": "order",
             "in": "body",
             "required": true,
             "schema": {
@@ -423,24 +431,6 @@ func init() {
             "sold"
           ],
           "x-go-custom-tag": "query:\"filter,sort\""
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "Tag": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
         }
       }
     }
@@ -480,11 +470,11 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "This is a simplifed version of the sample server Petstore server. You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/). For this sample, you can use the api key ` + "`" + `token` + "`" + ` to test the authorization filters.\n",
-    "title": "Swagger Petstore",
+    "description": "This is a simplified version of the sample server Petstore server.",
+    "title": "Swagger Simple Petstore",
     "version": "1.0.0"
   },
-  "host": "petstore.org",
+  "host": "localhost:5000",
   "basePath": "/api",
   "paths": {
     "/pets": {
@@ -528,48 +518,6 @@ func init() {
           }
         }
       },
-      "put": {
-        "security": [
-          {
-            "token": [
-              "admin"
-            ]
-          }
-        ],
-        "tags": [
-          "pet"
-        ],
-        "summary": "Update an existing pet",
-        "operationId": "PetUpdate",
-        "parameters": [
-          {
-            "description": "Pet object that needs to be added to the store",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Pet"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Updated successfully",
-            "schema": {
-              "$ref": "#/definitions/Pet"
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Pet not found"
-          },
-          "405": {
-            "description": "Validation exception"
-          }
-        }
-      },
       "post": {
         "security": [
           {
@@ -586,7 +534,7 @@ func init() {
         "parameters": [
           {
             "description": "Pet object that needs to be added to the store",
-            "name": "body",
+            "name": "pet",
             "in": "body",
             "required": true,
             "schema": {
@@ -636,6 +584,56 @@ func init() {
           },
           "404": {
             "description": "Pet not found"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "token": [
+              "admin"
+            ]
+          }
+        ],
+        "tags": [
+          "pet"
+        ],
+        "summary": "Update an existing pet",
+        "operationId": "PetUpdate",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of pet to return",
+            "name": "petId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Pet object that needs to be added to the store",
+            "name": "pet",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Pet"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Updated successfully",
+            "schema": {
+              "$ref": "#/definitions/Pet"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          },
+          "405": {
+            "description": "Validation exception"
           }
         }
       },
@@ -711,7 +709,7 @@ func init() {
         "parameters": [
           {
             "description": "order placed for purchasing the pet",
-            "name": "body",
+            "name": "order",
             "in": "body",
             "required": true,
             "schema": {
@@ -874,24 +872,6 @@ func init() {
             "sold"
           ],
           "x-go-custom-tag": "query:\"filter,sort\""
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "Tag": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
         }
       }
     }

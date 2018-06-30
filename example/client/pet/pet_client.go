@@ -155,7 +155,7 @@ func (a *Client) PetUpdate(ctx context.Context, params *PetUpdateParams) (*PetUp
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "PetUpdate",
 		Method:             "PUT",
-		PathPattern:        "/pets",
+		PathPattern:        "/pets/{petId}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
