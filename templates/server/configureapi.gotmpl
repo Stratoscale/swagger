@@ -75,6 +75,7 @@ type Config struct {
 	Auth{{ pascalize .ID }} func(token string, scopes []string) (interface{}, error)
 	{{ end -}}
 	{{ end -}}
+	ServerShutdown func()
 }
 
 // Handler returns an http.Handler given the handler configuration
@@ -148,7 +149,11 @@ func Handler(c Config) (http.Handler, error) {
 	})
 	{{ end -}}
 
-	api.ServerShutdown = func() {  }
+	if c.ServerShutdown != nil {
+		api.ServerShutdown = c.ServerShutdown
+	} else {
+		api.ServerShutdown = func() {  }
+	}
 	return api.Serve(c.InnerMiddleware), nil
 }
 
