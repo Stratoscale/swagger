@@ -58,7 +58,6 @@ func (o *PetCreateParams) BindRequest(r *http.Request, route *middleware.Matched
 				res = append(res, errors.NewParseError("pet", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)

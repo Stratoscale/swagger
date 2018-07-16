@@ -8,9 +8,7 @@ package store
 import (
 	"net/http"
 
-	errors "github.com/go-openapi/errors"
 	middleware "github.com/go-openapi/runtime/middleware"
-	strfmt "github.com/go-openapi/strfmt"
 )
 
 // InventoryGetHandlerFunc turns a function with the right signature into a inventory get handler
@@ -70,18 +68,4 @@ func (o *InventoryGet) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
-}
-
-// InventoryGetOKBody inventory get o k body
-// swagger:model InventoryGetOKBody
-type InventoryGetOKBody map[string]int32
-
-// Validate validates this inventory get o k body
-func (o InventoryGetOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
 }

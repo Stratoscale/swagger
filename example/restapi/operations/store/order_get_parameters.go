@@ -61,6 +61,7 @@ func (o *OrderGetParams) BindRequest(r *http.Request, route *middleware.MatchedR
 	return nil
 }
 
+// bindOrderID binds and validates parameter OrderID from path.
 func (o *OrderGetParams) bindOrderID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
@@ -83,6 +84,7 @@ func (o *OrderGetParams) bindOrderID(rawData []string, hasKey bool, formats strf
 	return nil
 }
 
+// validateOrderID carries on validations for parameter OrderID
 func (o *OrderGetParams) validateOrderID(formats strfmt.Registry) error {
 
 	if err := validate.MinimumInt("orderId", "path", int64(o.OrderID), 1, false); err != nil {

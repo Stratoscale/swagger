@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -46,7 +45,7 @@ func NewInventoryGetOK() *InventoryGetOK {
 successful operation
 */
 type InventoryGetOK struct {
-	Payload InventoryGetOKBody
+	Payload map[string]int32
 }
 
 func (o *InventoryGetOK) Error() string {
@@ -60,20 +59,5 @@ func (o *InventoryGetOK) readResponse(response runtime.ClientResponse, consumer 
 		return err
 	}
 
-	return nil
-}
-
-/*InventoryGetOKBody inventory get o k body
-swagger:model InventoryGetOKBody
-*/
-type InventoryGetOKBody map[string]int32
-
-// Validate validates this inventory get o k body
-func (o InventoryGetOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
 	return nil
 }

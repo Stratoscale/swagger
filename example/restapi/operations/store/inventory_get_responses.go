@@ -23,7 +23,7 @@ type InventoryGetOK struct {
 	/*
 	  In: Body
 	*/
-	Payload InventoryGetOKBody `json:"body,omitempty"`
+	Payload map[string]int32 `json:"body,omitempty"`
 }
 
 // NewInventoryGetOK creates InventoryGetOK with default headers values
@@ -33,13 +33,13 @@ func NewInventoryGetOK() *InventoryGetOK {
 }
 
 // WithPayload adds the payload to the inventory get o k response
-func (o *InventoryGetOK) WithPayload(payload InventoryGetOKBody) *InventoryGetOK {
+func (o *InventoryGetOK) WithPayload(payload map[string]int32) *InventoryGetOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the inventory get o k response
-func (o *InventoryGetOK) SetPayload(payload InventoryGetOKBody) {
+func (o *InventoryGetOK) SetPayload(payload map[string]int32) {
 	o.Payload = payload
 }
 

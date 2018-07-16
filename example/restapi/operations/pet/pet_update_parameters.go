@@ -66,7 +66,6 @@ func (o *PetUpdateParams) BindRequest(r *http.Request, route *middleware.Matched
 				res = append(res, errors.NewParseError("pet", "body", "", err))
 			}
 		} else {
-
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
 				res = append(res, err)
@@ -90,6 +89,7 @@ func (o *PetUpdateParams) BindRequest(r *http.Request, route *middleware.Matched
 	return nil
 }
 
+// bindPetID binds and validates parameter PetID from path.
 func (o *PetUpdateParams) bindPetID(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
