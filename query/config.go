@@ -5,6 +5,7 @@ import "errors"
 const (
 	// fields in the struct tag.
 	sortTag   = "sort"
+	splitTag  = "split"
 	filterTag = "filter"
 	paramTag  = "param"
 	// search param in query string.
@@ -53,6 +54,8 @@ type Config struct {
 	OffsetParam string
 	// SearchOperator used to combine search condition together. defaults to "AND".
 	SearchOperator string
+	// SplitValueOnComma used to split the values on comma in the filter values in order to read multiple columns
+	SplitValueOnComma bool
 }
 
 func (c *Config) defaults() error {
