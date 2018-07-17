@@ -55,9 +55,10 @@ func (e ParseError) Error() string { return e.msg }
 // You should initialize it only once, and then use it in your http.Handler.
 type Builder struct {
 	*Config
-	searcher     Searcher
-	sortFields   map[string]bool
-	filterFields map[string]filterField
+	searcher          Searcher
+	sortFields        map[string]bool
+	filterFields      map[string]filterField
+	splitValueOnComma bool
 }
 
 type parseFn func(string) (interface{}, bool)
@@ -198,6 +199,10 @@ func (b *Builder) parseFilter(params url.Values) (string, []interface{}, error) 
 		if !ok {
 			continue
 		}
+		// used for query string that can contain comma sperated values to query
+		if b.splitValueOnComma && len(args) == 1 && strings.Contains(args[0], ",") {
+			args = strings.Split(args[0], ",")
+		}
 		// there are two expression formats:
 		// 1. "KEY = VAL"                     - when only one argument is given.
 		// 2. "(KEY = VAL OR KEY = VAL2 ...)" - when multiple values are given.
@@ -273,6 +278,9 @@ func (b *Builder) parseField(field *structs.Field) {
 	if contains(options, sortTag) {
 		b.sortFields[gorm.ToDBName(field.Name())] = true
 	}
+	if contains(options, splitTag) {
+		b.SplitValueOnComma = true
+	}
 	// struct field has a filter option.
 	if !contains(options, filterTag) {
 		return
@@ -310,10 +318,17 @@ func (b *Builder) parseField(field *structs.Field) {
 		b.addFilterField(withSep+opGreaterThanOrEqual, colName+" >= ?", parseFn)
 	default:
 		typ := reflect.TypeOf(v)
+		_, isStringer := v.(fmt.Stringer)
 		// add more cases if needed.
-		if typ.ConvertibleTo(reflect.TypeOf([]string{})) {
+		switch {
+		case typ.ConvertibleTo(reflect.TypeOf([]string{})):
 			b.addStringField(colName, withSep, wrapFn)
+		case isStringer:
+			b.addStringField(colName, withSep, wrapFn)
+		default:
+			panic(fmt.Sprintf("Could not use field %s (%T) with query filter", field.Name(), v))
 		}
+
 	}
 }
 

@@ -5,6 +5,7 @@ import "errors"
 const (
 	// fields in the struct tag.
 	sortTag   = "sort"
+	splitTag  = "split"
 	filterTag = "filter"
 	paramTag  = "param"
 	// search param in query string.
