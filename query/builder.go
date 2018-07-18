@@ -55,18 +55,18 @@ func (e ParseError) Error() string { return e.msg }
 // You should initialize it only once, and then use it in your http.Handler.
 type Builder struct {
 	*Config
-	searcher          Searcher
-	sortFields        map[string]bool
-	filterFields      map[string]filterField
-	splitValueOnComma bool
+	searcher     Searcher
+	sortFields   map[string]bool
+	filterFields map[string]filterField
 }
 
 type parseFn func(string) (interface{}, bool)
 
 type filterField struct {
-	exp   string
-	parse parseFn
-	wrap  WrapFn
+	exp          string
+	parse        parseFn
+	wrap         WrapFn
+	splitOnComma bool
 }
 
 // NewBuilder initialize a Builder and parse the passing Model that will be used in
@@ -199,8 +199,7 @@ func (b *Builder) parseFilter(params url.Values) (string, []interface{}, error) 
 		if !ok {
 			continue
 		}
-		// used for query string that can contain comma sperated values to query
-		if b.splitValueOnComma && len(args) == 1 && strings.Contains(args[0], ",") {
+		if filter.splitOnComma && len(args) == 1 && strings.Contains(args[0], ",") {
 			args = strings.Split(args[0], ",")
 		}
 		// there are two expression formats:
@@ -278,13 +277,12 @@ func (b *Builder) parseField(field *structs.Field) {
 	if contains(options, sortTag) {
 		b.sortFields[gorm.ToDBName(field.Name())] = true
 	}
-	if contains(options, splitTag) {
-		b.SplitValueOnComma = true
-	}
 	// struct field has a filter option.
 	if !contains(options, filterTag) {
 		return
 	}
+
+	splitOnComma := contains(options, splitTag)
 	colName := gorm.ToDBName(field.Name())
 	// if it has custom query-param, use it instead.
 	if field, ok := hasQueryParam(options); ok {
@@ -301,7 +299,7 @@ func (b *Builder) parseField(field *structs.Field) {
 	}
 	switch v.(type) {
 	case string, *string:
-		b.addStringField(colName, withSep, wrapFn)
+		b.addStringField(colName, withSep, splitOnComma, wrapFn)
 	case int, *int, time.Time, *time.Time:
 		parseFn := parseInt
 		if _, ok := v.(time.Time); ok {
@@ -310,21 +308,21 @@ func (b *Builder) parseField(field *structs.Field) {
 		if _, ok := v.(*time.Time); ok {
 			parseFn = parseDatePointer
 		}
-		b.addFilterField(withSep+opEqual, colName+" = ?", parseFn)
-		b.addFilterField(withSep+opNotEqual, colName+" <> ?", parseFn)
-		b.addFilterField(withSep+opLessThan, colName+" < ?", parseFn)
-		b.addFilterField(withSep+opLessThanOrEqual, colName+" <= ?", parseFn)
-		b.addFilterField(withSep+opGreaterThan, colName+" > ?", parseFn)
-		b.addFilterField(withSep+opGreaterThanOrEqual, colName+" >= ?", parseFn)
+		b.addFilterField(withSep+opEqual, colName+" = ?", parseFn, splitOnComma)
+		b.addFilterField(withSep+opNotEqual, colName+" <> ?", parseFn, splitOnComma)
+		b.addFilterField(withSep+opLessThan, colName+" < ?", parseFn, splitOnComma)
+		b.addFilterField(withSep+opLessThanOrEqual, colName+" <= ?", parseFn, splitOnComma)
+		b.addFilterField(withSep+opGreaterThan, colName+" > ?", parseFn, splitOnComma)
+		b.addFilterField(withSep+opGreaterThanOrEqual, colName+" >= ?", parseFn, splitOnComma)
 	default:
 		typ := reflect.TypeOf(v)
 		_, isStringer := v.(fmt.Stringer)
 		// add more cases if needed.
 		switch {
 		case typ.ConvertibleTo(reflect.TypeOf([]string{})):
-			b.addStringField(colName, withSep, wrapFn)
+			b.addStringField(colName, withSep, splitOnComma, wrapFn)
 		case isStringer:
-			b.addStringField(colName, withSep, wrapFn)
+			b.addStringField(colName, withSep, splitOnComma, wrapFn)
 		default:
 			panic(fmt.Sprintf("Could not use field %s (%T) with query filter", field.Name(), v))
 		}
@@ -333,20 +331,20 @@ func (b *Builder) parseField(field *structs.Field) {
 }
 
 // addStringField adds all string filters to the given field.
-func (b *Builder) addStringField(colName, withSep string, wrap WrapFn) {
-	b.addFilterField(withSep+opEqual, colName+" = ?", parseString, wrap)
-	b.addFilterField(withSep+opNotEqual, colName+" <> ?", parseString, wrap)
-	b.addFilterField(withSep+opLike, colName+" LIKE ?", parseLikeString, wrap)
+func (b *Builder) addStringField(colName, withSep string, splitOnComma bool, wrap WrapFn) {
+	b.addFilterField(withSep+opEqual, colName+" = ?", parseString, splitOnComma, wrap)
+	b.addFilterField(withSep+opNotEqual, colName+" <> ?", parseString, splitOnComma, wrap)
+	b.addFilterField(withSep+opLike, colName+" LIKE ?", parseLikeString, splitOnComma, wrap)
 }
 
 // addFilterField gets field name, expression (format) and parse function, and
 // add it to the filterFields.
-func (b *Builder) addFilterField(name, format string, parse parseFn, wrap ...WrapFn) {
+func (b *Builder) addFilterField(name, format string, parse parseFn, splitOnComma bool, wrap ...WrapFn) {
 	wrapFn := nopWrapper
 	if len(wrap) != 0 {
 		wrapFn = wrap[0]
 	}
-	b.filterFields[name] = filterField{exp: format, parse: parse, wrap: wrapFn}
+	b.filterFields[name] = filterField{exp: format, parse: parse, wrap: wrapFn, splitOnComma: splitOnComma}
 }
 
 // hasQueryParam return the custom param if there is one.
