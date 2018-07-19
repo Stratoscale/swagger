@@ -369,8 +369,11 @@ func contains(l []string, s string) bool {
 
 // filter parsers.
 func parseInt(s string) (interface{}, bool) {
-	n, err := strconv.Atoi(s)
-	return s, err == nil && n >= 0
+	if s == "" {
+		return nil, false
+	}
+	n, err := strconv.ParseInt(s, 10, 64)
+	return n, err == nil
 }
 
 func parseString(s string) (interface{}, bool) {
