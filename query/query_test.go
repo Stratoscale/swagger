@@ -83,7 +83,7 @@ func TestQuery(t *testing.T) {
 				Limit:   10,
 				Offset:  5,
 				CondExp: "age > ? AND (name = ? OR name = ? OR name = ?)",
-				CondVal: []interface{}{"10", "a8m", "pos", "yossi"},
+				CondVal: []interface{}{int64(10), "a8m", "pos", "yossi"},
 			},
 		},
 		{
@@ -172,7 +172,7 @@ func TestQuery(t *testing.T) {
 			expectedQueryInput: &DBQuery{
 				Limit:   25,
 				CondExp: "age = ? AND ((name = ? OR status LIKE ?) AND (name = ? OR status LIKE ?))",
-				CondVal: []interface{}{"foo", "%foo%", "bar", "%bar%", "20"},
+				CondVal: []interface{}{"foo", "%foo%", "bar", "%bar%", int64(20)},
 			},
 		},
 	}
