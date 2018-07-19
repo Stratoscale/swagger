@@ -12,6 +12,9 @@ swagger = docker run --rm \
 build:
 	docker build . -t $(image)
 
+deps:
+	go get ./...
+
 test:
 	go build ./example/main.go
 	go test ./...
