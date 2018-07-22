@@ -269,6 +269,15 @@ func parseNumber(k, v string, min, max int) (int, error) {
 	return n, nil
 }
 
+func (b *Builder) addFilterFieldsForNumericFields(withSep, colName string, parse parseFn, splitOnComma bool ) {
+	b.addFilterField(withSep+opEqual, colName+" = ?", parse, splitOnComma)
+	b.addFilterField(withSep+opNotEqual, colName+" <> ?", parse, splitOnComma)
+	b.addFilterField(withSep+opLessThan, colName+" < ?", parse, splitOnComma)
+	b.addFilterField(withSep+opLessThanOrEqual, colName+" <= ?", parse, splitOnComma)
+	b.addFilterField(withSep+opGreaterThan, colName+" > ?", parse, splitOnComma)
+	b.addFilterField(withSep+opGreaterThanOrEqual, colName+" >= ?", parse, splitOnComma)
+}
+
 // parseField handle sort and filter fields.
 func (b *Builder) parseField(field *structs.Field) {
 	// get all options from the struct field.
@@ -300,20 +309,18 @@ func (b *Builder) parseField(field *structs.Field) {
 	switch v.(type) {
 	case string, *string:
 		b.addStringField(colName, withSep, splitOnComma, wrapFn)
-	case int, *int, time.Time, *time.Time:
+	case int, *int:
 		parseFn := parseInt
-		if _, ok := v.(time.Time); ok {
-			parseFn = parseDate
-		}
-		if _, ok := v.(*time.Time); ok {
-			parseFn = parseDatePointer
-		}
-		b.addFilterField(withSep+opEqual, colName+" = ?", parseFn, splitOnComma)
-		b.addFilterField(withSep+opNotEqual, colName+" <> ?", parseFn, splitOnComma)
-		b.addFilterField(withSep+opLessThan, colName+" < ?", parseFn, splitOnComma)
-		b.addFilterField(withSep+opLessThanOrEqual, colName+" <= ?", parseFn, splitOnComma)
-		b.addFilterField(withSep+opGreaterThan, colName+" > ?", parseFn, splitOnComma)
-		b.addFilterField(withSep+opGreaterThanOrEqual, colName+" >= ?", parseFn, splitOnComma)
+		b.addFilterFieldsForNumericFields(withSep, colName, parseFn, splitOnComma)
+	case int64, *int64:
+		parseFn := parseInt64
+		b.addFilterFieldsForNumericFields(withSep, colName, parseFn, splitOnComma)
+	case time.Time:
+		parseFn := parseDate
+		b.addFilterFieldsForNumericFields(withSep, colName, parseFn, splitOnComma)
+	case *time.Time:
+		parseFn := parseDatePointer
+		b.addFilterFieldsForNumericFields(withSep, colName, parseFn, splitOnComma)
 	default:
 		typ := reflect.TypeOf(v)
 		_, isStringer := v.(fmt.Stringer)
@@ -369,6 +376,14 @@ func contains(l []string, s string) bool {
 
 // filter parsers.
 func parseInt(s string) (interface{}, bool) {
+	if s == "" {
+		return nil, false
+	}
+	n, err := strconv.Atoi(s)
+	return n, err == nil
+}
+
+func parseInt64(s string) (interface{}, bool) {
 	if s == "" {
 		return nil, false
 	}

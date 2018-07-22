@@ -21,7 +21,8 @@ func (Tags) Wrap(s string) string {
 type model struct {
 	Name      string    `query:"sort,filter"`
 	Status    string    `query:"filter"`
-	Age       int       `query:"filter"`
+	Age       int64     `query:"filter"`
+	Year      int       `query:"filter""`
 	CreatedAt time.Time `query:"sort,filter"`
 	UpdatedAt time.Time `query:"sort,filter"`
 	Tags      Tags      `query:"filter,param=tag_name"`
@@ -168,11 +169,12 @@ func TestQuery(t *testing.T) {
 			parseInput: url.Values{
 				"search": []string{"foo", "bar"},
 				"age_eq": []string{"20"},
+				"year_eq": []string{"1998"},
 			},
 			expectedQueryInput: &DBQuery{
 				Limit:   25,
-				CondExp: "age = ? AND ((name = ? OR status LIKE ?) AND (name = ? OR status LIKE ?))",
-				CondVal: []interface{}{"foo", "%foo%", "bar", "%bar%", int64(20)},
+				CondExp: "age = ? AND year = ? AND ((name = ? OR status LIKE ?) AND (name = ? OR status LIKE ?))",
+				CondVal: []interface{}{"foo", "%foo%", "bar", "%bar%", int64(20), 1998},
 			},
 		},
 	}
