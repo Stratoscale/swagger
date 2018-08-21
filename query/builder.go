@@ -122,7 +122,7 @@ func (b *Builder) Parse(params url.Values) (*DBQuery, error) {
 	}
 	// parse and validate limit.
 	if v := params.Get(b.LimitParam); v != "" {
-		n, err := parseNumber(b.LimitParam, v, 1, b.LimitMaxValue)
+		n, err := parseNumber(b.LimitParam, v, 0, b.LimitMaxValue)
 		if err != nil {
 			return nil, err
 		}
