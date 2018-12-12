@@ -88,6 +88,26 @@ func TestQuery(t *testing.T) {
 			},
 		},
 		{
+			name: "multiple filters. with exact names",
+			parseInput: url.Values{
+				"lp":      []string{"10"},
+				"oft":     []string{"5"},
+				"age_gt":  []string{"10"},
+				"name":    []string{"a8m", "pos", "yossi"},
+			},
+			configInput: &Config{
+				DefaultLimit: 100,
+				OffsetParam:  "oft",
+				LimitParam:   "lp",
+			},
+			expectedQueryInput: &DBQuery{
+				Limit:   10,
+				Offset:  5,
+				CondExp: "age > ? AND (name = ? OR name = ? OR name = ?)",
+				CondVal: []interface{}{int64(10), "a8m", "pos", "yossi"},
+			},
+		},
+		{
 			name: "custom tag name",
 			configInput: &Config{
 				TagName: "ormquery",

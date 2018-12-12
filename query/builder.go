@@ -270,6 +270,7 @@ func parseNumber(k, v string, min, max int) (int, error) {
 }
 
 func (b *Builder) addFilterFieldsForNumericFields(withSep, colName string, parse parseFn, splitOnComma bool ) {
+	b.addFilterField(colName, colName+" = ?", parse, splitOnComma)
 	b.addFilterField(withSep+opEqual, colName+" = ?", parse, splitOnComma)
 	b.addFilterField(withSep+opNotEqual, colName+" <> ?", parse, splitOnComma)
 	b.addFilterField(withSep+opLessThan, colName+" < ?", parse, splitOnComma)
@@ -339,6 +340,7 @@ func (b *Builder) parseField(field *structs.Field) {
 
 // addStringField adds all string filters to the given field.
 func (b *Builder) addStringField(colName, withSep string, splitOnComma bool, wrap WrapFn) {
+	b.addFilterField(colName, colName+" = ?", parseString, splitOnComma, wrap)
 	b.addFilterField(withSep+opEqual, colName+" = ?", parseString, splitOnComma, wrap)
 	b.addFilterField(withSep+opNotEqual, colName+" <> ?", parseString, splitOnComma, wrap)
 	b.addFilterField(withSep+opLike, colName+" LIKE ?", parseLikeString, splitOnComma, wrap)
