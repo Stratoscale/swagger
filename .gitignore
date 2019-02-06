@@ -1,2 +1,5 @@
 main
 .idea/
+example/restapi
+example/models
+example/client
