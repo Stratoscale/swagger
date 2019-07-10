@@ -4,10 +4,11 @@ import "errors"
 
 const (
 	// fields in the struct tag.
-	sortTag   = "sort"
-	splitTag  = "split"
-	filterTag = "filter"
-	paramTag  = "param"
+	sortTag     = "sort"
+	splitTag    = "split"
+	filterTag   = "filter"
+	paramTag    = "param"
+	detailedTag = "detailed"
 	// search param in query string.
 	searchParam = "search"
 	// operators in query string.
@@ -54,6 +55,8 @@ type Config struct {
 	OffsetParam string
 	// SearchOperator used to combine search condition together. defaults to "AND".
 	SearchOperator string
+	// OnlySelectNonDetailedFields - if true will select only the non 'detailed' fields.
+	OnlySelectNonDetailedFields bool
 }
 
 func (c *Config) defaults() error {

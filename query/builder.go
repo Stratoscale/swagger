@@ -58,6 +58,7 @@ type Builder struct {
 	searcher     Searcher
 	sortFields   map[string]bool
 	filterFields map[string]filterField
+	selectFields []string
 }
 
 type parseFn func(string) (interface{}, bool)
@@ -117,8 +118,9 @@ func (b *Builder) init() {
 // It's safe to call it from multiple goroutines concurrently.
 func (b *Builder) Parse(params url.Values) (*DBQuery, error) {
 	q := &DBQuery{
-		Sort:  b.DefaultSort,
-		Limit: b.DefaultLimit,
+		Sort:   b.DefaultSort,
+		Limit:  b.DefaultLimit,
+		Select: strings.Join(b.selectFields[:], ","),
 	}
 	// parse and validate limit.
 	if v := params.Get(b.LimitParam); v != "" {
@@ -269,7 +271,7 @@ func parseNumber(k, v string, min, max int) (int, error) {
 	return n, nil
 }
 
-func (b *Builder) addFilterFieldsForNumericFields(withSep, colName string, parse parseFn, splitOnComma bool ) {
+func (b *Builder) addFilterFieldsForNumericFields(withSep, colName string, parse parseFn, splitOnComma bool) {
 	b.addFilterField(colName, colName+" = ?", parse, splitOnComma)
 	b.addFilterField(withSep+opEqual, colName+" = ?", parse, splitOnComma)
 	b.addFilterField(withSep+opNotEqual, colName+" <> ?", parse, splitOnComma)
@@ -281,11 +283,18 @@ func (b *Builder) addFilterFieldsForNumericFields(withSep, colName string, parse
 
 // parseField handle sort and filter fields.
 func (b *Builder) parseField(field *structs.Field) {
+	colName := gorm.ToDBName(field.Name())
+
 	// get all options from the struct field.
 	options := strings.Split(field.Tag(b.TagName), ",")
+	gormOptions := strings.Split(field.Tag("gorm"),",")
+
+	if !contains(gormOptions,"-") && (!b.OnlySelectNonDetailedFields || !contains(options, detailedTag)) {
+		b.selectFields = append(b.selectFields, colName)
+	}
 	// struct field has a sort option.
 	if contains(options, sortTag) {
-		b.sortFields[gorm.ToDBName(field.Name())] = true
+		b.sortFields[colName] = true
 	}
 	// struct field has a filter option.
 	if !contains(options, filterTag) {
@@ -293,7 +302,6 @@ func (b *Builder) parseField(field *structs.Field) {
 	}
 
 	splitOnComma := contains(options, splitTag)
-	colName := gorm.ToDBName(field.Name())
 	// if it has custom query-param, use it instead.
 	if field, ok := hasQueryParam(options); ok {
 		colName = field

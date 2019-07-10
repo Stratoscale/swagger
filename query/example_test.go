@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"testing"
 	"time"
 )
 
-func ExampleBuilder_Parse() {
+func TestExampleBuilder_Parse(t *testing.T) {
 	b, err := NewBuilder(&Config{
 		Model: struct {
 			Name      string    `query:"sort,filter"`
 			Age       int       `query:"filter"`
-			CreatedAt time.Time `query:"sort,filter"`
+			CreatedAt time.Time `query:"sort,filter,detailed"`
 		}{},
 		DefaultSort:  "created_at desc",
 		DefaultLimit: 10,
+		OnlySelectNonDetailedFields: true,
 	})
 	if err != nil {
 		log.Fatal("failed to initialize builder", err)
