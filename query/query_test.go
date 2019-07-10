@@ -22,7 +22,8 @@ type model struct {
 	Name      string    `query:"sort,filter"`
 	Status    string    `query:"filter"`
 	Age       int64     `query:"filter"`
-	Year      int       `query:"filter""`
+	Year      int       `query:"filter,detailed"`
+	Dummy     int       `gorm:"-"`
 	CreatedAt time.Time `query:"sort,filter"`
 	UpdatedAt time.Time `query:"sort,filter"`
 	Tags      Tags      `query:"filter,param=tag_name"`
@@ -197,28 +198,81 @@ func TestQuery(t *testing.T) {
 				CondVal: []interface{}{"foo", "%foo%", "bar", "%bar%", int64(20), 1998},
 			},
 		},
+		{
+			name: "select with details",
+			parseInput: url.Values{
+				"sort": []string{"+updated_at", "name", "-created_at"},
+			},
+			configInput: &Config{
+				Model: &model{},
+				OnlySelectNonDetailedFields: false,
+			},
+			expectedQueryInput: &DBQuery{
+				Limit:  25,
+				Offset: 0,
+				Sort:   "name desc",
+				Select: "name,status,age,year,created_at,updated_at,tags",
+			},
+		},
+		{
+			name: "select with details by default",
+			parseInput: url.Values{
+				"sort": []string{"+updated_at", "name", "-created_at"},
+			},
+			configInput: &Config{
+				Model: &model{},
+			},
+			expectedQueryInput: &DBQuery{
+				Limit:  25,
+				Offset: 0,
+				Sort:   "name desc",
+				Select: "name,status,age,year,created_at,updated_at,tags",
+			},
+		},
+		{
+			name: "select with without details",
+			parseInput: url.Values{
+				"sort": []string{"+updated_at", "name", "-created_at"},
+			},
+			configInput: &Config{
+				Model: &model{},
+				OnlySelectNonDetailedFields: true,
+			},
+			expectedQueryInput: &DBQuery{
+				Limit:  25,
+				Offset: 0,
+				Sort:   "name desc",
+				Select: "name,status,age,created_at,updated_at,tags",
+			},
+		},
 	}
 	for _, test := range testCases {
-		if test.configInput.Model == nil {
-			test.configInput.Model = model{}
-		}
-		builder, _ := NewBuilder(test.configInput)
-		qi, err := builder.Parse(test.parseInput)
-		if err != nil {
-			assert.IsType(t, test.expectedParseError, err, err.Error())
-			continue
-		}
-		assert.Equal(t, test.expectedQueryInput.Limit, qi.Limit, "limit field")
-		assert.Equal(t, test.expectedQueryInput.Offset, qi.Offset, "offset field")
-		// use this technique because the order of the map iterations is unpredictable.
-		// test that the expression is "equal".
-		actual, expected := strings.Split(qi.CondExp, " AND "), strings.Split(test.expectedQueryInput.CondExp, " AND ")
-		sort.Strings(actual)
-		sort.Strings(expected)
-		assert.Equal(t, actual, expected, "condition expression")
-		// do the same thing for the condition values
-		for _, val := range test.expectedQueryInput.CondVal {
-			assert.Contains(t, qi.CondVal, val, "condition value")
-		}
+		tt := test
+		t.Run(tt.name, func(t *testing.T) {
+			if test.configInput.Model == nil {
+				test.configInput.Model = model{}
+			}
+			builder, _ := NewBuilder(test.configInput)
+			qi, err := builder.Parse(test.parseInput)
+			if err != nil {
+				assert.IsType(t, test.expectedParseError, err, err.Error())
+				return
+			}
+			assert.Equal(t, test.expectedQueryInput.Limit, qi.Limit, "limit field")
+			assert.Equal(t, test.expectedQueryInput.Offset, qi.Offset, "offset field")
+			if test.expectedQueryInput.Select != "" {
+				assert.Equal(t, test.expectedQueryInput.Select, qi.Select, "select field")
+			}
+			// use this technique because the order of the map iterations is unpredictable.
+			// test that the expression is "equal".
+			actual, expected := strings.Split(qi.CondExp, " AND "), strings.Split(test.expectedQueryInput.CondExp, " AND ")
+			sort.Strings(actual)
+			sort.Strings(expected)
+			assert.Equal(t, actual, expected, "condition expression")
+			// do the same thing for the condition values
+			for _, val := range test.expectedQueryInput.CondVal {
+				assert.Contains(t, qi.CondVal, val, "condition value")
+			}
+		})
 	}
 }
