@@ -11,6 +11,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type MyEnum string
+
+const (
+	enumVal1 MyEnum = "v1"
+	enumVal2 MyEnum = "v2"
+)
+
 type Tags []string
 
 func (Tags) Wrap(s string) string {
@@ -19,15 +26,24 @@ func (Tags) Wrap(s string) string {
 
 // model used in the unit tests.
 type model struct {
-	Name      string    `query:"sort,filter"`
-	Status    string    `query:"filter"`
-	Age       int64     `query:"filter"`
-	Year      int       `query:"filter,detailed"`
-	Dummy     int       `gorm:"-"`
-	CreatedAt time.Time `query:"sort,filter"`
-	UpdatedAt time.Time `query:"sort,filter"`
-	Tags      Tags      `query:"filter,param=tag_name"`
+	Name       string    `query:"sort,filter"`
+	Status     string    `query:"filter"`
+	Age        int64     `query:"filter"`
+	Year       int       `query:"filter,detailed"`
+	Dummy      int       `gorm:"-"`
+	CreatedAt  time.Time `query:"sort,filter"`
+	UpdatedAt  time.Time `query:"sort,filter"`
+	Tags       Tags      `query:"filter,param=tag_name"`
+	FlagPtr    *bool     `query:"filter,sort"`
+	Flag       bool      `query:"filter,sort"`
+	EnumValPtr *MyEnum   `query:"filter,sort"`
+	EnumVal    MyEnum    `query:"filter,sort"`
 }
+
+const (
+	detailedFields    = "name,status,age,year,created_at,updated_at,tags,flag_ptr,flag,enum_val_ptr,enum_val"
+	nonDetailedFields = "name,status,age,created_at,updated_at,tags,flag_ptr,flag,enum_val_ptr,enum_val"
+)
 
 // Search is an implementation of Seacrher used for testing.
 func (model) Search(val string) (string, []interface{}) {
@@ -69,6 +85,24 @@ func TestQuery(t *testing.T) {
 			},
 		},
 		{
+			name: "simple filters",
+			parseInput: url.Values{
+				"flag":        []string{"true"},
+				"flag_ptr_eq": []string{"false"},
+				"enum_val":    []string{"v1"},
+				"enum_val_ptr":    []string{"v2"},
+				"age_gt":      []string{"10"},
+				"name_eq":     []string{"a8m", "pos", "yossi"},
+			},
+			configInput: &Config{},
+			expectedQueryInput: &DBQuery{
+				Limit:   25,
+				Offset:  0,
+				CondExp: "age > ? AND (name = ? OR name = ? OR name = ?) AND flag = ? AND flag_ptr = ? AND enum_val = ? AND enum_val_ptr = ?",
+				CondVal: []interface{}{int64(10), "a8m", "pos", "yossi", "true", "false", "v1", "v2"},
+			},
+		},
+		{
 			name: "multiple filters. with custom configuration",
 			parseInput: url.Values{
 				"lp":      []string{"10"},
@@ -91,10 +125,10 @@ func TestQuery(t *testing.T) {
 		{
 			name: "multiple filters. with exact names",
 			parseInput: url.Values{
-				"lp":      []string{"10"},
-				"oft":     []string{"5"},
-				"age_gt":  []string{"10"},
-				"name":    []string{"a8m", "pos", "yossi"},
+				"lp":     []string{"10"},
+				"oft":    []string{"5"},
+				"age_gt": []string{"10"},
+				"name":   []string{"a8m", "pos", "yossi"},
 			},
 			configInput: &Config{
 				DefaultLimit: 100,
@@ -188,8 +222,8 @@ func TestQuery(t *testing.T) {
 				Model: &model{},
 			},
 			parseInput: url.Values{
-				"search": []string{"foo", "bar"},
-				"age_eq": []string{"20"},
+				"search":  []string{"foo", "bar"},
+				"age_eq":  []string{"20"},
 				"year_eq": []string{"1998"},
 			},
 			expectedQueryInput: &DBQuery{
@@ -204,14 +238,14 @@ func TestQuery(t *testing.T) {
 				"sort": []string{"+updated_at", "name", "-created_at"},
 			},
 			configInput: &Config{
-				Model: &model{},
+				Model:                       &model{},
 				OnlySelectNonDetailedFields: false,
 			},
 			expectedQueryInput: &DBQuery{
 				Limit:  25,
 				Offset: 0,
 				Sort:   "name desc",
-				Select: "name,status,age,year,created_at,updated_at,tags",
+				Select: detailedFields,
 			},
 		},
 		{
@@ -226,7 +260,7 @@ func TestQuery(t *testing.T) {
 				Limit:  25,
 				Offset: 0,
 				Sort:   "name desc",
-				Select: "name,status,age,year,created_at,updated_at,tags",
+				Select: detailedFields,
 			},
 		},
 		{
@@ -235,14 +269,14 @@ func TestQuery(t *testing.T) {
 				"sort": []string{"+updated_at", "name", "-created_at"},
 			},
 			configInput: &Config{
-				Model: &model{},
+				Model:                       &model{},
 				OnlySelectNonDetailedFields: true,
 			},
 			expectedQueryInput: &DBQuery{
 				Limit:  25,
 				Offset: 0,
 				Sort:   "name desc",
-				Select: "name,status,age,created_at,updated_at,tags",
+				Select: nonDetailedFields,
 			},
 		},
 	}
