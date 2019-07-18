@@ -281,6 +281,12 @@ func (b *Builder) addFilterFieldsForNumericFields(withSep, colName string, parse
 	b.addFilterField(withSep+opGreaterThanOrEqual, colName+" >= ?", parse, splitOnComma)
 }
 
+func (b *Builder) addFilterFieldsForBoolFields(withSep, colName string, parse parseFn, splitOnComma bool) {
+	b.addFilterField(colName, colName+" = ?", parse, splitOnComma)
+	b.addFilterField(withSep+opEqual, colName+" = ?", parse, splitOnComma)
+	b.addFilterField(withSep+opNotEqual, colName+" <> ?", parse, splitOnComma)
+}
+
 // parseField handle sort and filter fields.
 func (b *Builder) parseField(field *structs.Field) {
 	colName := gorm.ToDBName(field.Name())
@@ -330,11 +336,18 @@ func (b *Builder) parseField(field *structs.Field) {
 	case *time.Time:
 		parseFn := parseDatePointer
 		b.addFilterFieldsForNumericFields(withSep, colName, parseFn, splitOnComma)
+	case bool, *bool:
+		parseFn := parseBool
+		b.addFilterFieldsForBoolFields(withSep, colName, parseFn, splitOnComma)
 	default:
 		typ := reflect.TypeOf(v)
 		_, isStringer := v.(fmt.Stringer)
+
 		// add more cases if needed.
+		dummyString := ""
 		switch {
+		case typ.ConvertibleTo(reflect.TypeOf(dummyString)), typ.ConvertibleTo(reflect.TypeOf(&dummyString)):
+			b.addStringField(colName, withSep, splitOnComma, wrapFn)
 		case typ.ConvertibleTo(reflect.TypeOf([]string{})):
 			b.addStringField(colName, withSep, splitOnComma, wrapFn)
 		case isStringer:
@@ -420,4 +433,15 @@ func parseDatePointer(s string) (interface{}, bool) {
 		return nil, false
 	}
 	return &t, true
+}
+
+func parseBool(s string) (interface{}, bool) {
+	if s == "" {
+		return nil, false
+	}
+	_, err := strconv.ParseBool(s)
+	if err != nil {
+		return nil, false
+	}
+	return s, true
 }
