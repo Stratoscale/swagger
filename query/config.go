@@ -55,7 +55,11 @@ type Config struct {
 	OffsetParam string
 	// SearchOperator used to combine search condition together. defaults to "AND".
 	SearchOperator string
-	// OnlySelectNonDetailedFields - if true will select only the non 'detailed' fields.
+	// ExplicitSelect - if true, the query will select the relevant specific columns.
+	//    else will select '*'
+	ExplicitSelect bool
+	// OnlySelectNonDetailedFields - if true will select only the non 'detailed' fields
+	//    true implies ExplicitSelect = true
 	OnlySelectNonDetailedFields bool
 }
 

@@ -76,6 +76,11 @@ func NewBuilder(c *Config) (*Builder, error) {
 	if err := c.defaults(); err != nil {
 		return nil, err
 	}
+
+	if c.OnlySelectNonDetailedFields {
+		c.ExplicitSelect = true
+	}
+
 	b := &Builder{
 		Config:       c,
 		sortFields:   make(map[string]bool),
@@ -287,17 +292,41 @@ func (b *Builder) addFilterFieldsForBoolFields(withSep, colName string, parse pa
 	b.addFilterField(withSep+opNotEqual, colName+" <> ?", parse, splitOnComma)
 }
 
+var (
+	ignoreOptions []string = []string{
+		"-",
+		"foreignkey",
+		"association_foreignkey",
+		"many2many",
+	}
+)
+
+func (b *Builder) appendToSelect(colName string, gormOptions []string, options []string) {
+	for _, s := range ignoreOptions {
+		if contains(gormOptions, s) {
+			return
+		}
+	}
+	if b.OnlySelectNonDetailedFields && contains(options, detailedTag) {
+		return
+	}
+
+	b.selectFields = append(b.selectFields, colName)
+
+}
+
 // parseField handle sort and filter fields.
 func (b *Builder) parseField(field *structs.Field) {
 	colName := gorm.ToDBName(field.Name())
 
 	// get all options from the struct field.
 	options := strings.Split(field.Tag(b.TagName), ",")
-	gormOptions := strings.Split(field.Tag("gorm"),",")
+	gormOptions := strings.Split(field.Tag("gorm"), ";")
 
-	if !contains(gormOptions,"-") && (!b.OnlySelectNonDetailedFields || !contains(options, detailedTag)) {
-		b.selectFields = append(b.selectFields, colName)
+	if b.ExplicitSelect {
+		b.appendToSelect(colName, gormOptions, options)
 	}
+
 	// struct field has a sort option.
 	if contains(options, sortTag) {
 		b.sortFields[colName] = true
@@ -390,7 +419,7 @@ func hasQueryParam(l []string) (string, bool) {
 // contains test if string is in the given list.
 func contains(l []string, s string) bool {
 	for i := range l {
-		if l[i] == s {
+		if l[i] == s || strings.HasPrefix(l[i], s) {
 			return true
 		}
 	}

@@ -26,18 +26,21 @@ func (Tags) Wrap(s string) string {
 
 // model used in the unit tests.
 type model struct {
-	Name       string    `query:"sort,filter"`
-	Status     string    `query:"filter"`
-	Age        int64     `query:"filter"`
-	Year       int       `query:"filter,detailed"`
-	Dummy      int       `gorm:"-"`
-	CreatedAt  time.Time `query:"sort,filter"`
-	UpdatedAt  time.Time `query:"sort,filter"`
-	Tags       Tags      `query:"filter,param=tag_name"`
-	FlagPtr    *bool     `query:"filter,sort"`
-	Flag       bool      `query:"filter,sort"`
-	EnumValPtr *MyEnum   `query:"filter,sort"`
-	EnumVal    MyEnum    `query:"filter,sort"`
+	Name           string    `query:"sort,filter"`
+	Status         string    `query:"filter"`
+	Age            int64     `query:"filter"`
+	Year           int       `query:"filter,detailed"`
+	Dummy          int       `gorm:"-"`
+	CreatedAt      time.Time `query:"sort,filter"`
+	UpdatedAt      time.Time `query:"sort,filter"`
+	Tags           Tags      `query:"filter,param=tag_name"`
+	FlagPtr        *bool     `query:"filter,sort"`
+	Flag           bool      `query:"filter,sort"`
+	EnumValPtr     *MyEnum   `query:"filter,sort"`
+	EnumVal        MyEnum    `query:"filter,sort"`
+	FieldToIgnore1 bool      `gorm:"foreignkey:ExternalEndpointID"`
+	FieldToIgnore2 bool      `gorm:"association_foreignkey:UUID"`
+	FieldToIgnore3 bool      `gorm:"many2many:UUID"`
 }
 
 const (
@@ -87,12 +90,12 @@ func TestQuery(t *testing.T) {
 		{
 			name: "simple filters",
 			parseInput: url.Values{
-				"flag":        []string{"true"},
-				"flag_ptr_eq": []string{"false"},
-				"enum_val":    []string{"v1"},
-				"enum_val_ptr":    []string{"v2"},
-				"age_gt":      []string{"10"},
-				"name_eq":     []string{"a8m", "pos", "yossi"},
+				"flag":         []string{"true"},
+				"flag_ptr_eq":  []string{"false"},
+				"enum_val":     []string{"v1"},
+				"enum_val_ptr": []string{"v2"},
+				"age_gt":       []string{"10"},
+				"name_eq":      []string{"a8m", "pos", "yossi"},
 			},
 			configInput: &Config{},
 			expectedQueryInput: &DBQuery{
@@ -233,6 +236,23 @@ func TestQuery(t *testing.T) {
 			},
 		},
 		{
+			name: "select with details and explicit",
+			parseInput: url.Values{
+				"sort": []string{"+updated_at", "name", "-created_at"},
+			},
+			configInput: &Config{
+				Model:                       &model{},
+				OnlySelectNonDetailedFields: false,
+				ExplicitSelect: true,
+			},
+			expectedQueryInput: &DBQuery{
+				Limit:  25,
+				Offset: 0,
+				Sort:   "name desc",
+				Select: detailedFields,
+			},
+		},
+		{
 			name: "select with details",
 			parseInput: url.Values{
 				"sort": []string{"+updated_at", "name", "-created_at"},
@@ -245,7 +265,7 @@ func TestQuery(t *testing.T) {
 				Limit:  25,
 				Offset: 0,
 				Sort:   "name desc",
-				Select: detailedFields,
+				Select: "",
 			},
 		},
 		{
@@ -260,11 +280,11 @@ func TestQuery(t *testing.T) {
 				Limit:  25,
 				Offset: 0,
 				Sort:   "name desc",
-				Select: detailedFields,
+				Select: "",
 			},
 		},
 		{
-			name: "select with without details",
+			name: "select without details",
 			parseInput: url.Values{
 				"sort": []string{"+updated_at", "name", "-created_at"},
 			},
