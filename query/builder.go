@@ -110,7 +110,7 @@ func (b *Builder) init() {
 	for l.Len() > 0 {
 		fields := l.Remove(l.Front())
 		for _, field := range fields.([]*structs.Field) {
-			if field.IsEmbedded() {
+			if field.IsEmbedded() && field.Kind() == reflect.Struct {
 				l.PushFront(field.Fields())
 				continue
 			}
