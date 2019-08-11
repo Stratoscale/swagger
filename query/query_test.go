@@ -18,14 +18,26 @@ const (
 	enumVal2 MyEnum = "v2"
 )
 
+type UserProperties map[string]string
+func (m UserProperties) Validate(s string) error {
+	return nil
+}
+
 type Tags []string
 
 func (Tags) Wrap(s string) string {
 	return fmt.Sprintf("(name IN (SELECT DISTINCT tag_name IN tags WHERE %s))", s)
 }
 
+type MyStruct struct {
+	V1 int `gorm:"-"`
+	V2 string
+}
+
 // model used in the unit tests.
 type model struct {
+	MyStruct
+	UserProperties `gorm:"-"`
 	Name           string    `query:"sort,filter"`
 	Status         string    `query:"filter"`
 	Age            int64     `query:"filter"`
@@ -44,8 +56,8 @@ type model struct {
 }
 
 const (
-	detailedFields    = "name,status,age,year,created_at,updated_at,tags,flag_ptr,flag,enum_val_ptr,enum_val"
-	nonDetailedFields = "name,status,age,created_at,updated_at,tags,flag_ptr,flag,enum_val_ptr,enum_val"
+	detailedFields    = "name,status,age,year,created_at,updated_at,tags,flag_ptr,flag,enum_val_ptr,enum_val,v2"
+	nonDetailedFields = "name,status,age,created_at,updated_at,tags,flag_ptr,flag,enum_val_ptr,enum_val,v2"
 )
 
 // Search is an implementation of Seacrher used for testing.
@@ -289,7 +301,7 @@ func TestQuery(t *testing.T) {
 				"sort": []string{"+updated_at", "name", "-created_at"},
 			},
 			configInput: &Config{
-				Model:                       &model{},
+				Model:                       model{},
 				OnlySelectNonDetailedFields: true,
 			},
 			expectedQueryInput: &DBQuery{
