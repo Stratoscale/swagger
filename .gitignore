@@ -1,5 +1,6 @@
 main
 .idea/
-example/restapi
-example/models
-example/client
+testdata/restapi
+testdata/models
+testdata/client
+**/RCS/*

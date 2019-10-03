@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 
-	"github.com/Stratoscale/swagger/example/restapi/operations/store"
+	"github.com/Stratoscale/swagger/testdata/restapi/operations/store"
 	"github.com/go-openapi/runtime/middleware"
 )
 
