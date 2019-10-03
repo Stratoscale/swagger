@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Stratoscale/swagger/example/auth"
-	"github.com/Stratoscale/swagger/example/internal/pet"
-	"github.com/Stratoscale/swagger/example/internal/store"
-	"github.com/Stratoscale/swagger/example/restapi"
+	"github.com/Stratoscale/swagger/testdata/auth"
+	"github.com/Stratoscale/swagger/testdata/internal/pet"
+	"github.com/Stratoscale/swagger/testdata/internal/store"
+	"github.com/Stratoscale/swagger/testdata/restapi"
 )
 
 func main() {

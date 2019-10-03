@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/Stratoscale/swagger/example/models"
-	"github.com/Stratoscale/swagger/example/restapi/operations/pet"
+	"github.com/Stratoscale/swagger/testdata/models"
+	"github.com/Stratoscale/swagger/testdata/restapi/operations/pet"
 	"github.com/go-openapi/runtime/middleware"
 )
 
