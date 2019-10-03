@@ -3,3 +3,4 @@ main
 example/restapi
 example/models
 example/client
+**/RCS/*
