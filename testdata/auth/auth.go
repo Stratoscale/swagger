@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Stratoscale/swagger/example/restapi"
+	"github.com/Stratoscale/swagger/testdata/restapi"
 	"github.com/go-openapi/runtime/middleware"
 )
 
