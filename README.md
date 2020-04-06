@@ -52,7 +52,7 @@ a standard `http.Handler`
 Using the docker container, add the following alias to a `~/.bashrc` or similar
 
 ```bash
-alias swagger="docker run --rm -e GOPATH=/go -v ${HOME}:${HOME} -w $(pwd) -u $(id -u):$(id -g) stratoscale/swagger:v1.0.9"
+alias swagger="docker run --rm -e GOPATH=/go -v ${HOME}:${HOME} -w "'$(pwd)'" -u $(id -u):$(id -g) stratoscale/swagger:v1.0.9"
 ```
 
 Then, use the `swagger` command:
